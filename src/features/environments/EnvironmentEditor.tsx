@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import type { EnvironmentVariable } from "../../types/environment";
 import { useEnvironmentStore } from "./environmentStore";
 
 function createEmptyVariable(): EnvironmentVariable {
-  return { id: crypto.randomUUID(), key: "", value: "", isSecret: false, sortOrder: 0 };
+  return {
+    id: crypto.randomUUID(),
+    key: "",
+    value: "",
+    isSecret: false,
+    sortOrder: 0,
+  };
 }
 
 function VariableRow({
@@ -15,7 +21,7 @@ function VariableRow({
   variable: EnvironmentVariable;
   onChange: (patch: Partial<EnvironmentVariable>) => void;
   onRemove: () => void;
-}) {
+}): JSX.Element {
   const [revealed, setRevealed] = useState(false);
   const showMasked = variable.isSecret && !revealed;
 
@@ -25,20 +31,26 @@ function VariableRow({
         className="bg-transparent px-1 font-mono text-sm text-text-primary outline-none"
         placeholder="key"
         value={variable.key}
-        onChange={(e) => onChange({ key: e.target.value })}
+        onChange={(e) => {
+          onChange({ key: e.target.value });
+        }}
       />
       <input
         className="bg-transparent px-1 font-mono text-sm text-text-primary outline-none"
         placeholder="value"
         type={showMasked ? "password" : "text"}
         value={variable.value}
-        onChange={(e) => onChange({ value: e.target.value })}
+        onChange={(e) => {
+          onChange({ value: e.target.value });
+        }}
       />
       <label className="flex items-center gap-1 text-xs text-text-muted">
         <input
           type="checkbox"
           checked={variable.isSecret}
-          onChange={(e) => onChange({ isSecret: e.target.checked })}
+          onChange={(e) => {
+            onChange({ isSecret: e.target.checked });
+          }}
         />
         secret
       </label>
@@ -47,7 +59,9 @@ function VariableRow({
           <button
             type="button"
             className="text-xs text-text-muted hover:text-text-primary"
-            onClick={() => setRevealed((v) => !v)}
+            onClick={() => {
+              setRevealed((v) => !v);
+            }}
           >
             {revealed ? "Hide" : "Show"}
           </button>
@@ -71,8 +85,9 @@ export function EnvironmentEditor({
 }: {
   environmentId: string;
   onClose: () => void;
-}) {
-  const { environments, setVariables, deleteEnvironment } = useEnvironmentStore();
+}): JSX.Element | null {
+  const { environments, setVariables, deleteEnvironment } =
+    useEnvironmentStore();
   const environment = environments.find((e) => e.id === environmentId);
   const [variables, setLocalVariables] = useState<EnvironmentVariable[]>(() => [
     ...(environment?.variables ?? []),
@@ -81,15 +96,17 @@ export function EnvironmentEditor({
 
   if (!environment) return null;
 
-  function update(id: string, patch: Partial<EnvironmentVariable>) {
-    setLocalVariables((prev) => prev.map((v) => (v.id === id ? { ...v, ...patch } : v)));
+  function update(id: string, patch: Partial<EnvironmentVariable>): void {
+    setLocalVariables((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, ...patch } : v)),
+    );
   }
 
-  function remove(id: string) {
+  function remove(id: string): void {
     setLocalVariables((prev) => prev.filter((v) => v.id !== id));
   }
 
-  async function handleSave() {
+  async function handleSave(): Promise<void> {
     const cleaned = variables
       .filter((v) => v.key.trim().length > 0)
       .map((v, i) => ({ ...v, sortOrder: i }));
@@ -101,7 +118,9 @@ export function EnvironmentEditor({
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50">
       <div className="flex max-h-[80vh] w-[560px] flex-col rounded-sm border border-surface-3 bg-surface-1 p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-text-primary">{environment.name} variables</h2>
+          <h2 className="text-sm font-semibold text-text-primary">
+            {environment.name} variables
+          </h2>
           <button
             type="button"
             className="text-text-muted hover:text-text-primary"
@@ -116,14 +135,20 @@ export function EnvironmentEditor({
             <VariableRow
               key={variable.id}
               variable={variable}
-              onChange={(patch) => update(variable.id, patch)}
-              onRemove={() => remove(variable.id)}
+              onChange={(patch) => {
+                update(variable.id, patch);
+              }}
+              onRemove={() => {
+                remove(variable.id);
+              }}
             />
           ))}
           <button
             type="button"
             className="mt-2 text-sm text-text-muted hover:text-text-primary"
-            onClick={() => setLocalVariables((prev) => [...prev, createEmptyVariable()])}
+            onClick={() => {
+              setLocalVariables((prev) => [...prev, createEmptyVariable()]);
+            }}
           >
             + Add variable
           </button>
@@ -133,7 +158,9 @@ export function EnvironmentEditor({
           <button
             type="button"
             className="text-sm text-status-server-error hover:underline"
-            onClick={() => setShowDeleteConfirm(true)}
+            onClick={() => {
+              setShowDeleteConfirm(true);
+            }}
           >
             Delete environment
           </button>
@@ -163,7 +190,9 @@ export function EnvironmentEditor({
           confirmLabel="Delete"
           danger
           onConfirm={() => void deleteEnvironment(environmentId).then(onClose)}
-          onCancel={() => setShowDeleteConfirm(false)}
+          onCancel={() => {
+            setShowDeleteConfirm(false);
+          }}
         />
       )}
     </div>

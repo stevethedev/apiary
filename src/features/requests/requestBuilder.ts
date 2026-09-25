@@ -16,7 +16,9 @@ export function buildEffectiveHeaders(
     .filter((row) => row.enabled && row.key.length > 0)
     .map((row) => [row.key, row.value]);
 
-  const hasContentType = active.some(([key]) => key.toLowerCase() === "content-type");
+  const hasContentType = active.some(
+    ([key]) => key.toLowerCase() === "content-type",
+  );
   const contentTypeDefault = contentTypeDefaultFor(body);
   if (!hasContentType && contentTypeDefault) {
     active.unshift(["Content-Type", contentTypeDefault]);
@@ -53,7 +55,9 @@ export function computeGeneratedHeaders(
   auth: AuthConfig,
 ): GeneratedHeader[] {
   const enabledKeys = new Set(
-    headers.filter((row) => row.enabled && row.key.length > 0).map((row) => row.key.toLowerCase()),
+    headers
+      .filter((row) => row.enabled && row.key.length > 0)
+      .map((row) => row.key.toLowerCase()),
   );
   const generated: GeneratedHeader[] = [];
 
@@ -73,7 +77,11 @@ export function computeGeneratedHeaders(
     }
   }
 
-  if (auth.type === "apiKey" && auth.placement === "header" && !enabledKeys.has(auth.key.toLowerCase())) {
+  if (
+    auth.type === "apiKey" &&
+    auth.placement === "header" &&
+    !enabledKeys.has(auth.key.toLowerCase())
+  ) {
     generated.push({ key: auth.key || "(key)", value: auth.value });
   }
 
@@ -90,7 +98,10 @@ export function buildEffectiveBody(body: BodyConfig): string | null {
     case "form":
       return body.rows
         .filter((row) => row.enabled && row.key.length > 0)
-        .map((row) => `${encodeURIComponent(row.key)}=${encodeURIComponent(row.value)}`)
+        .map(
+          (row) =>
+            `${encodeURIComponent(row.key)}=${encodeURIComponent(row.value)}`,
+        )
         .join("&");
   }
 }

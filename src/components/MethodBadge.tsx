@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import type { HttpMethod } from "../types/http";
 
 const METHOD_COLOR: Record<HttpMethod, string> = {
@@ -10,7 +11,7 @@ const METHOD_COLOR: Record<HttpMethod, string> = {
   OPTIONS: "text-method-options",
 };
 
-export function MethodBadge({ method }: { method: HttpMethod }) {
+export function MethodBadge({ method }: { method: HttpMethod }): JSX.Element {
   return (
     <span className={`font-mono text-xs font-semibold ${METHOD_COLOR[method]}`}>
       {method}

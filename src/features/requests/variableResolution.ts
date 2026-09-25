@@ -23,7 +23,10 @@ export function resolveDraft(
   const missing = new Set<string>();
 
   function resolve(text: string): string {
-    const { resolved, missing: unresolvedNames } = resolveVariables(text, variables);
+    const { resolved, missing: unresolvedNames } = resolveVariables(
+      text,
+      variables,
+    );
     unresolvedNames.forEach((name) => missing.add(name));
     return resolved;
   }
@@ -31,7 +34,11 @@ export function resolveDraft(
   const baseUrl = resolve(draft.url);
   const resolvedParams = draft.params
     .filter((row) => row.enabled && row.key.length > 0)
-    .map((row) => ({ ...row, key: resolve(row.key), value: resolve(row.value) }));
+    .map((row) => ({
+      ...row,
+      key: resolve(row.key),
+      value: resolve(row.value),
+    }));
   const url = buildQueryString(baseUrl, resolvedParams);
 
   const effectiveHeaders = buildEffectiveHeaders(draft.headers, draft.body);

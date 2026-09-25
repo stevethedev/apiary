@@ -1,10 +1,5 @@
 export type ShortcutAction =
-  | "send"
-  | "save"
-  | "newTab"
-  | "focusUrl"
-  | "focusSearch"
-  | "closeTab";
+  "send" | "save" | "newTab" | "focusUrl" | "focusSearch" | "closeTab";
 
 interface MinimalKeyboardEvent {
   key: string;
@@ -21,7 +16,9 @@ function isModifierPressed(event: MinimalKeyboardEvent): boolean {
 /** Pure mapping from a keydown event to the action it represents, or null
  * if it isn't one of Apiary's shortcuts. Kept separate from the DOM
  * listener so it's unit-testable without simulating real events. */
-export function matchShortcut(event: MinimalKeyboardEvent): ShortcutAction | null {
+export function matchShortcut(
+  event: MinimalKeyboardEvent,
+): ShortcutAction | null {
   if (!isModifierPressed(event)) return null;
 
   switch (event.key.toLowerCase()) {

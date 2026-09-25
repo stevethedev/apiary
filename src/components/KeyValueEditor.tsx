@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { createEmptyRow, type KeyValueRow } from "../types/http";
 import { ensureTrailingEmptyRow } from "../lib/formatting";
 
@@ -14,17 +15,17 @@ export function KeyValueEditor({
   onChange,
   keyPlaceholder = "KEY",
   valuePlaceholder = "VALUE",
-}: KeyValueEditorProps) {
+}: KeyValueEditorProps): JSX.Element {
   const displayRows = ensureTrailingEmptyRow(rows);
 
-  function updateRow(id: string, patch: Partial<KeyValueRow>) {
+  function updateRow(id: string, patch: Partial<KeyValueRow>): void {
     const next = displayRows.map((row) =>
       row.id === id ? { ...row, ...patch } : row,
     );
     onChange(ensureTrailingEmptyRow(next));
   }
 
-  function removeRow(id: string) {
+  function removeRow(id: string): void {
     onChange(rows.filter((row) => row.id !== id));
   }
 
@@ -46,13 +47,17 @@ export function KeyValueEditor({
               className="bg-transparent px-1 font-mono text-sm text-text-primary outline-none placeholder:text-text-muted"
               value={row.key}
               placeholder="key"
-              onChange={(e) => updateRow(row.id, { key: e.target.value })}
+              onChange={(e) => {
+                updateRow(row.id, { key: e.target.value });
+              }}
             />
             <input
               className="bg-transparent px-1 font-mono text-sm text-text-primary outline-none placeholder:text-text-muted"
               value={row.value}
               placeholder="value"
-              onChange={(e) => updateRow(row.id, { value: e.target.value })}
+              onChange={(e) => {
+                updateRow(row.id, { value: e.target.value });
+              }}
             />
             {isTrailing ? (
               <span />
@@ -61,13 +66,17 @@ export function KeyValueEditor({
                 <input
                   type="checkbox"
                   checked={row.enabled}
-                  onChange={(e) => updateRow(row.id, { enabled: e.target.checked })}
+                  onChange={(e) => {
+                    updateRow(row.id, { enabled: e.target.checked });
+                  }}
                 />
                 <button
                   type="button"
                   aria-label="Remove row"
                   className="text-text-muted hover:text-status-server-error"
-                  onClick={() => removeRow(row.id)}
+                  onClick={() => {
+                    removeRow(row.id);
+                  }}
                 >
                   ×
                 </button>

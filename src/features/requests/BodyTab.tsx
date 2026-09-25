@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import Editor from "@monaco-editor/react";
 import { KeyValueEditor } from "../../components/KeyValueEditor";
 import { useTheme } from "../../components/ThemeProvider";
@@ -29,18 +30,23 @@ function bodyOfType(type: BodyConfig["type"]): BodyConfig {
   }
 }
 
-export function BodyTab({ body, onChange }: BodyTabProps) {
+export function BodyTab({ body, onChange }: BodyTabProps): JSX.Element {
   const { effectiveTheme } = useTheme();
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-surface-2 p-2 text-sm">
         {BODY_TYPES.map((option) => (
-          <label key={option.value} className="flex items-center gap-1.5 text-text-secondary">
+          <label
+            key={option.value}
+            className="flex items-center gap-1.5 text-text-secondary"
+          >
             <input
               type="radio"
               name="body-type"
               checked={body.type === option.value}
-              onChange={() => onChange(bodyOfType(option.value))}
+              onChange={() => {
+                onChange(bodyOfType(option.value));
+              }}
             />
             {option.label}
           </label>
@@ -57,7 +63,9 @@ export function BodyTab({ body, onChange }: BodyTabProps) {
             language="json"
             theme={monacoThemeName(effectiveTheme)}
             value={body.content}
-            onChange={(value) => onChange({ type: "json", content: value ?? "" })}
+            onChange={(value) => {
+              onChange({ type: "json", content: value ?? "" });
+            }}
             options={{
               minimap: { enabled: false },
               fontSize: 13,
@@ -72,7 +80,9 @@ export function BodyTab({ body, onChange }: BodyTabProps) {
         <textarea
           className="min-h-0 flex-1 resize-none bg-surface-1 p-3 font-mono text-sm text-text-primary outline-none"
           value={body.content}
-          onChange={(e) => onChange({ type: "raw", content: e.target.value })}
+          onChange={(e) => {
+            onChange({ type: "raw", content: e.target.value });
+          }}
         />
       )}
 
@@ -80,7 +90,9 @@ export function BodyTab({ body, onChange }: BodyTabProps) {
         <div className="p-3">
           <KeyValueEditor
             rows={body.rows}
-            onChange={(rows) => onChange({ type: "form", rows })}
+            onChange={(rows) => {
+              onChange({ type: "form", rows });
+            }}
           />
         </div>
       )}

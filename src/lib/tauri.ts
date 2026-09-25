@@ -1,5 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { HttpErrorResult, HttpResponseResult, ResolvedRequestPayload } from "../types/http";
+import type {
+  HttpErrorResult,
+  HttpResponseResult,
+  ResolvedRequestPayload,
+} from "../types/http";
 import type { Collection } from "../types/collection";
 import type { Environment, EnvironmentVariable } from "../types/environment";
 import type { HistoryEntry } from "../types/history";
@@ -29,7 +33,10 @@ export async function sendRequest(
   payload: ResolvedRequestPayload,
 ): Promise<HttpResponseResult> {
   try {
-    return await invoke<HttpResponseResult>("send_request", { requestId, payload });
+    return await invoke<HttpResponseResult>("send_request", {
+      requestId,
+      payload,
+    });
   } catch (error) {
     if (isHttpErrorResult(error)) {
       throw new ApiaryHttpError(error);
@@ -44,14 +51,25 @@ export async function cancelRequest(requestId: string): Promise<void> {
 
 // --- Collections -----------------------------------------------------------
 
-export const listCollections = () => invoke<Collection[]>("list_collections");
-export const createCollection = (name: string) =>
+export const listCollections = (): Promise<Collection[]> =>
+  invoke<Collection[]>("list_collections");
+export const createCollection = (name: string): Promise<Collection> =>
   invoke<Collection>("create_collection", { name });
-export const renameCollection = (id: string, name: string) =>
-  invoke<void>("rename_collection", { id, name });
-export const deleteCollection = (id: string) => invoke<void>("delete_collection", { id });
-export const reorderCollections = (orderedIds: string[]) =>
-  invoke<void>("reorder_collections", { orderedIds });
+
+export async function renameCollection(
+  id: string,
+  name: string,
+): Promise<void> {
+  await invoke("rename_collection", { id, name });
+}
+
+export async function deleteCollection(id: string): Promise<void> {
+  await invoke("delete_collection", { id });
+}
+
+export async function reorderCollections(orderedIds: string[]): Promise<void> {
+  await invoke("reorder_collections", { orderedIds });
+}
 
 // --- Requests ----------------------------------------------------------------
 
@@ -66,33 +84,62 @@ export interface SavedRequestInput {
   body: SavedRequest["body"];
 }
 
-export const listRequests = (collectionId: string) =>
+export const listRequests = (collectionId: string): Promise<SavedRequest[]> =>
   invoke<SavedRequest[]>("list_requests", { collectionId });
-export const createRequest = (input: SavedRequestInput) =>
-  invoke<SavedRequest>("create_request", { input });
-export const updateRequest = (id: string, input: SavedRequestInput) =>
+export const createRequest = (
+  input: SavedRequestInput,
+): Promise<SavedRequest> => invoke<SavedRequest>("create_request", { input });
+export const updateRequest = (
+  id: string,
+  input: SavedRequestInput,
+): Promise<SavedRequest> =>
   invoke<SavedRequest>("update_request", { id, input });
-export const duplicateRequest = (id: string) =>
+export const duplicateRequest = (id: string): Promise<SavedRequest> =>
   invoke<SavedRequest>("duplicate_request", { id });
-export const deleteRequest = (id: string) => invoke<void>("delete_request", { id });
-export const reorderRequests = (collectionId: string, orderedIds: string[]) =>
-  invoke<void>("reorder_requests", { collectionId, orderedIds });
+
+export async function deleteRequest(id: string): Promise<void> {
+  await invoke("delete_request", { id });
+}
+
+export async function reorderRequests(
+  collectionId: string,
+  orderedIds: string[],
+): Promise<void> {
+  await invoke("reorder_requests", { collectionId, orderedIds });
+}
 
 // --- Environments ------------------------------------------------------------
 
-export const listEnvironments = () => invoke<Environment[]>("list_environments");
-export const createEnvironment = (name: string) =>
+export const listEnvironments = (): Promise<Environment[]> =>
+  invoke<Environment[]>("list_environments");
+export const createEnvironment = (name: string): Promise<Environment> =>
   invoke<Environment>("create_environment", { name });
-export const updateEnvironment = (id: string, name: string) =>
+export const updateEnvironment = (
+  id: string,
+  name: string,
+): Promise<Environment> =>
   invoke<Environment>("update_environment", { id, name });
-export const deleteEnvironment = (id: string) => invoke<void>("delete_environment", { id });
-export const setActiveEnvironment = (id: string) =>
-  invoke<void>("set_active_environment", { id });
-export const clearActiveEnvironment = () => invoke<void>("clear_active_environment");
+
+export async function deleteEnvironment(id: string): Promise<void> {
+  await invoke("delete_environment", { id });
+}
+
+export async function setActiveEnvironment(id: string): Promise<void> {
+  await invoke("set_active_environment", { id });
+}
+
+export async function clearActiveEnvironment(): Promise<void> {
+  await invoke("clear_active_environment");
+}
+
 export const setEnvironmentVariables = (
   environmentId: string,
   variables: EnvironmentVariable[],
-) => invoke<Environment>("set_environment_variables", { environmentId, variables });
+): Promise<Environment> =>
+  invoke<Environment>("set_environment_variables", {
+    environmentId,
+    variables,
+  });
 
 // --- History -------------------------------------------------------------------
 
@@ -110,13 +157,24 @@ export interface HistoryEntryInput {
   errorKind: string | null;
 }
 
-export const appendHistory = (entry: HistoryEntryInput) =>
-  invoke<HistoryEntry>("append_history", { entry });
-export const listHistory = (limit: number, offset: number) =>
+export const appendHistory = (
+  entry: HistoryEntryInput,
+): Promise<HistoryEntry> => invoke<HistoryEntry>("append_history", { entry });
+export const listHistory = (
+  limit: number,
+  offset: number,
+): Promise<HistoryEntry[]> =>
   invoke<HistoryEntry[]>("list_history", { limit, offset });
-export const clearHistory = () => invoke<void>("clear_history");
+
+export async function clearHistory(): Promise<void> {
+  await invoke("clear_history");
+}
 
 // --- Tabs ------------------------------------------------------------------------
 
-export const loadOpenTabs = () => invoke<StoredTab[]>("load_open_tabs");
-export const saveOpenTabs = (tabs: StoredTab[]) => invoke<void>("save_open_tabs", { tabs });
+export const loadOpenTabs = (): Promise<StoredTab[]> =>
+  invoke<StoredTab[]>("load_open_tabs");
+
+export async function saveOpenTabs(tabs: StoredTab[]): Promise<void> {
+  await invoke("save_open_tabs", { tabs });
+}

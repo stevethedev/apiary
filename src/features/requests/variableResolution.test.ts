@@ -37,7 +37,10 @@ describe("resolveDraft", () => {
 
     const { payload } = resolveDraft(draft, {});
 
-    expect(payload?.headers).toContainEqual(["Content-Type", "application/json"]);
+    expect(payload?.headers).toContainEqual([
+      "Content-Type",
+      "application/json",
+    ]);
     expect(payload?.body).toBe('{"name":"a"}');
   });
 
@@ -47,7 +50,12 @@ describe("resolveDraft", () => {
       url: "https://api.example.com/users",
       body: { type: "json" as const, content: "{}" },
       headers: [
-        { id: "1", key: "Content-Type", value: "application/vnd.api+json", enabled: true },
+        {
+          id: "1",
+          key: "Content-Type",
+          value: "application/vnd.api+json",
+          enabled: true,
+        },
       ],
     };
 
@@ -56,7 +64,9 @@ describe("resolveDraft", () => {
     const contentTypeHeaders = payload?.headers.filter(
       ([key]) => key.toLowerCase() === "content-type",
     );
-    expect(contentTypeHeaders).toEqual([["Content-Type", "application/vnd.api+json"]]);
+    expect(contentTypeHeaders).toEqual([
+      ["Content-Type", "application/vnd.api+json"],
+    ]);
   });
 
   it("resolves bearer token variables", () => {

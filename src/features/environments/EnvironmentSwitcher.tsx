@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import { PromptDialog } from "../../components/PromptDialog";
 import { RowMenu } from "../../components/RowMenu";
 import { useEnvironmentStore } from "./environmentStore";
@@ -7,20 +7,23 @@ interface EnvironmentSwitcherProps {
   onEdit: (environmentId: string) => void;
 }
 
-export function EnvironmentSwitcher({ onEdit }: EnvironmentSwitcherProps) {
-  const { environments, createEnvironment, setActive, renameEnvironment } = useEnvironmentStore();
+export function EnvironmentSwitcher({
+  onEdit,
+}: EnvironmentSwitcherProps): JSX.Element {
+  const { environments, createEnvironment, setActive, renameEnvironment } =
+    useEnvironmentStore();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
   const active = environments.find((e) => e.isActive);
 
-  async function handleCreate(name: string) {
+  async function handleCreate(name: string): Promise<void> {
     const environment = await createEnvironment(name);
     await setActive(environment.id);
     setShowCreateDialog(false);
   }
 
-  function commitRename(environmentId: string, currentName: string) {
+  function commitRename(environmentId: string, currentName: string): void {
     setRenamingId(null);
     const trimmed = draftName.trim();
     if (trimmed.length > 0 && trimmed !== currentName) {
@@ -36,7 +39,9 @@ export function EnvironmentSwitcher({ onEdit }: EnvironmentSwitcherProps) {
           type="button"
           aria-label="New environment"
           className="rounded-sm px-1.5 hover:bg-surface-2 hover:text-text-primary"
-          onClick={() => setShowCreateDialog(true)}
+          onClick={() => {
+            setShowCreateDialog(true);
+          }}
         >
           +
         </button>
@@ -58,7 +63,9 @@ export function EnvironmentSwitcher({ onEdit }: EnvironmentSwitcherProps) {
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${
-                environment.id === active?.id ? "bg-status-success" : "bg-text-muted"
+                environment.id === active?.id
+                  ? "bg-status-success"
+                  : "bg-text-muted"
               }`}
             />
             {isRenaming ? (
@@ -66,9 +73,15 @@ export function EnvironmentSwitcher({ onEdit }: EnvironmentSwitcherProps) {
                 autoFocus
                 className="flex-1 bg-transparent text-text-primary outline-none"
                 value={draftName}
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => setDraftName(e.target.value)}
-                onBlur={() => commitRename(environment.id, environment.name)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                onChange={(e) => {
+                  setDraftName(e.target.value);
+                }}
+                onBlur={() => {
+                  commitRename(environment.id, environment.name);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") e.currentTarget.blur();
                   if (e.key === "Escape") setRenamingId(null);
@@ -79,10 +92,15 @@ export function EnvironmentSwitcher({ onEdit }: EnvironmentSwitcherProps) {
             )}
             <RowMenu
               items={[
-                { label: "Edit Variables", onClick: () => onEdit(environment.id) },
+                {
+                  label: "Edit Variables",
+                  onClick: (): void => {
+                    onEdit(environment.id);
+                  },
+                },
                 {
                   label: "Rename",
-                  onClick: () => {
+                  onClick: (): void => {
                     setDraftName(environment.name);
                     setRenamingId(environment.id);
                   },
@@ -100,7 +118,9 @@ export function EnvironmentSwitcher({ onEdit }: EnvironmentSwitcherProps) {
           placeholder="Development"
           confirmLabel="Create"
           onConfirm={(name) => void handleCreate(name)}
-          onCancel={() => setShowCreateDialog(false)}
+          onCancel={() => {
+            setShowCreateDialog(false);
+          }}
         />
       )}
     </div>

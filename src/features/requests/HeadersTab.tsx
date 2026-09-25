@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { KeyValueEditor } from "../../components/KeyValueEditor";
 import type { AuthConfig, BodyConfig, KeyValueRow } from "../../types/http";
 import { computeGeneratedHeaders } from "./requestBuilder";
@@ -9,12 +10,22 @@ interface HeadersTabProps {
   onChange: (headers: readonly KeyValueRow[]) => void;
 }
 
-export function HeadersTab({ headers, body, auth, onChange }: HeadersTabProps) {
+export function HeadersTab({
+  headers,
+  body,
+  auth,
+  onChange,
+}: HeadersTabProps): JSX.Element {
   const generated = computeGeneratedHeaders(headers, body, auth);
 
   return (
     <div className="p-3">
-      <KeyValueEditor rows={headers} onChange={onChange} keyPlaceholder="KEY" valuePlaceholder="VALUE" />
+      <KeyValueEditor
+        rows={headers}
+        onChange={onChange}
+        keyPlaceholder="KEY"
+        valuePlaceholder="VALUE"
+      />
 
       {generated.length > 0 && (
         <div className="mt-4">
@@ -27,8 +38,12 @@ export function HeadersTab({ headers, body, auth, onChange }: HeadersTabProps) {
                 key={row.key}
                 className="grid grid-cols-[1fr_1fr] gap-2 border-b border-surface-2 py-1"
               >
-                <span className="truncate px-1 font-mono text-text-secondary">{row.key}</span>
-                <span className="truncate px-1 font-mono text-text-muted">{row.value}</span>
+                <span className="truncate px-1 font-mono text-text-secondary">
+                  {row.key}
+                </span>
+                <span className="truncate px-1 font-mono text-text-muted">
+                  {row.value}
+                </span>
               </div>
             ))}
           </div>

@@ -13,10 +13,16 @@ interface CollectionsState {
   deleteCollection: (id: string) => Promise<void>;
   reorderCollections: (orderedIds: string[]) => Promise<void>;
   createRequest: (input: api.SavedRequestInput) => Promise<SavedRequest>;
-  updateRequest: (id: string, input: api.SavedRequestInput) => Promise<SavedRequest>;
+  updateRequest: (
+    id: string,
+    input: api.SavedRequestInput,
+  ) => Promise<SavedRequest>;
   duplicateRequest: (id: string) => Promise<SavedRequest>;
   deleteRequest: (id: string) => Promise<void>;
-  reorderRequests: (collectionId: string, orderedIds: string[]) => Promise<void>;
+  reorderRequests: (
+    collectionId: string,
+    orderedIds: string[],
+  ) => Promise<void>;
 }
 
 export const useCollectionsStore = create<CollectionsState>((set) => ({
@@ -24,7 +30,7 @@ export const useCollectionsStore = create<CollectionsState>((set) => ({
   requestsByCollection: {},
   loaded: false,
 
-  load: async () => {
+  load: async (): Promise<void> => {
     const collections = await api.listCollections();
     const requestLists = await Promise.all(
       collections.map((collection) => api.listRequests(collection.id)),
@@ -36,34 +42,40 @@ export const useCollectionsStore = create<CollectionsState>((set) => ({
     set({ collections, requestsByCollection, loaded: true });
   },
 
-  createCollection: async (name) => {
+  createCollection: async (name): Promise<Collection> => {
     const collection = await api.createCollection(name);
     set((state) => ({
       collections: [...state.collections, collection],
-      requestsByCollection: { ...state.requestsByCollection, [collection.id]: [] },
+      requestsByCollection: {
+        ...state.requestsByCollection,
+        [collection.id]: [],
+      },
     }));
     return collection;
   },
 
-  renameCollection: async (id, name) => {
+  renameCollection: async (id, name): Promise<void> => {
     await api.renameCollection(id, name);
     set((state) => ({
-      collections: state.collections.map((c) => (c.id === id ? { ...c, name } : c)),
+      collections: state.collections.map((c) =>
+        c.id === id ? { ...c, name } : c,
+      ),
     }));
   },
 
-  deleteCollection: async (id) => {
+  deleteCollection: async (id): Promise<void> => {
     await api.deleteCollection(id);
-    set((state) => {
-      const { [id]: _removed, ...rest } = state.requestsByCollection;
-      return {
-        collections: state.collections.filter((c) => c.id !== id),
-        requestsByCollection: rest,
-      };
-    });
+    set((state) => ({
+      collections: state.collections.filter((c) => c.id !== id),
+      requestsByCollection: Object.fromEntries(
+        Object.entries(state.requestsByCollection).filter(
+          ([collectionId]) => collectionId !== id,
+        ),
+      ),
+    }));
   },
 
-  reorderCollections: async (orderedIds) => {
+  reorderCollections: async (orderedIds): Promise<void> => {
     await api.reorderCollections(orderedIds);
     set((state) => ({
       collections: orderedIds
@@ -72,31 +84,34 @@ export const useCollectionsStore = create<CollectionsState>((set) => ({
     }));
   },
 
-  createRequest: async (input) => {
+  createRequest: async (input): Promise<SavedRequest> => {
     const request = await api.createRequest(input);
     set((state) => ({
       requestsByCollection: {
         ...state.requestsByCollection,
-        [input.collectionId]: [...(state.requestsByCollection[input.collectionId] ?? []), request],
+        [input.collectionId]: [
+          ...(state.requestsByCollection[input.collectionId] ?? []),
+          request,
+        ],
       },
     }));
     return request;
   },
 
-  updateRequest: async (id, input) => {
+  updateRequest: async (id, input): Promise<SavedRequest> => {
     const request = await api.updateRequest(id, input);
     set((state) => ({
       requestsByCollection: {
         ...state.requestsByCollection,
-        [input.collectionId]: (state.requestsByCollection[input.collectionId] ?? []).map((r) =>
-          r.id === id ? request : r,
-        ),
+        [input.collectionId]: (
+          state.requestsByCollection[input.collectionId] ?? []
+        ).map((r) => (r.id === id ? request : r)),
       },
     }));
     return request;
   },
 
-  duplicateRequest: async (id) => {
+  duplicateRequest: async (id): Promise<SavedRequest> => {
     const request = await api.duplicateRequest(id);
     set((state) => ({
       requestsByCollection: {
@@ -110,20 +125,20 @@ export const useCollectionsStore = create<CollectionsState>((set) => ({
     return request;
   },
 
-  deleteRequest: async (id) => {
+  deleteRequest: async (id): Promise<void> => {
     await api.deleteRequest(id);
     set((state) => {
       const requestsByCollection = { ...state.requestsByCollection };
       for (const collectionId of Object.keys(requestsByCollection)) {
-        requestsByCollection[collectionId] = requestsByCollection[collectionId].filter(
-          (r) => r.id !== id,
-        );
+        requestsByCollection[collectionId] = requestsByCollection[
+          collectionId
+        ].filter((r) => r.id !== id);
       }
       return { requestsByCollection };
     });
   },
 
-  reorderRequests: async (collectionId, orderedIds) => {
+  reorderRequests: async (collectionId, orderedIds): Promise<void> => {
     await api.reorderRequests(collectionId, orderedIds);
     set((state) => {
       const existing = state.requestsByCollection[collectionId] ?? [];
@@ -131,7 +146,10 @@ export const useCollectionsStore = create<CollectionsState>((set) => ({
         .map((id) => existing.find((r) => r.id === id))
         .filter((r): r is SavedRequest => r !== undefined);
       return {
-        requestsByCollection: { ...state.requestsByCollection, [collectionId]: reordered },
+        requestsByCollection: {
+          ...state.requestsByCollection,
+          [collectionId]: reordered,
+        },
       };
     });
   },

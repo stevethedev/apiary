@@ -20,7 +20,11 @@ export interface KeyValueRow {
 export type AuthConfig =
   | { readonly type: "none" }
   | { readonly type: "bearer"; readonly token: string }
-  | { readonly type: "basic"; readonly username: string; readonly password: string }
+  | {
+      readonly type: "basic";
+      readonly username: string;
+      readonly password: string;
+    }
   | {
       readonly type: "apiKey";
       readonly key: string;
@@ -71,7 +75,11 @@ export interface HttpResponseResult {
 export type ResolvedAuthPayload =
   | { readonly type: "none" }
   | { readonly type: "bearer"; readonly token: string }
-  | { readonly type: "basic"; readonly username: string; readonly password: string }
+  | {
+      readonly type: "basic";
+      readonly username: string;
+      readonly password: string;
+    }
   | {
       readonly type: "apiKey";
       readonly key: string;

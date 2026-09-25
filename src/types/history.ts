@@ -1,4 +1,10 @@
-import type { AuthConfig, BodyConfig, HttpErrorKind, HttpMethod, KeyValueRow } from "./http";
+import type {
+  AuthConfig,
+  BodyConfig,
+  HttpErrorKind,
+  HttpMethod,
+  KeyValueRow,
+} from "./http";
 
 /**
  * Full standalone snapshot of a request as it was actually sent, plus response

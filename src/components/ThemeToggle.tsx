@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import type { ThemePreference } from "../lib/theme";
 import { useTheme } from "./ThemeProvider";
 
@@ -19,14 +20,16 @@ const ICON: Record<ThemePreference, string> = {
   dark: "☾",
 };
 
-export function ThemeToggle() {
+export function ThemeToggle(): JSX.Element {
   const { preference, setPreference } = useTheme();
 
   return (
     <button
       type="button"
       title={`Theme: ${LABEL[preference]} (click to change)`}
-      onClick={() => setPreference(NEXT[preference])}
+      onClick={() => {
+        setPreference(NEXT[preference]);
+      }}
       className="rounded-sm px-1.5 py-0.5 text-sm text-text-muted hover:bg-surface-2 hover:text-text-primary"
     >
       {ICON[preference]}

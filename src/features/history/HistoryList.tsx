@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { MethodBadge } from "../../components/MethodBadge";
 import type { HistoryEntry } from "../../types/history";
@@ -29,7 +29,10 @@ function toDraft(entry: HistoryEntry): RequestDraft {
   };
 }
 
-export function HistoryList({ onRestore, filter = "" }: HistoryListProps) {
+export function HistoryList({
+  onRestore,
+  filter = "",
+}: HistoryListProps): JSX.Element {
   const { entries: allEntries, clear } = useHistoryStore();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const needle = filter.trim().toLowerCase();
@@ -46,7 +49,9 @@ export function HistoryList({ onRestore, filter = "" }: HistoryListProps) {
           <button
             type="button"
             className="hover:text-text-primary"
-            onClick={() => setShowClearConfirm(true)}
+            onClick={() => {
+              setShowClearConfirm(true);
+            }}
           >
             Clear
           </button>
@@ -58,7 +63,9 @@ export function HistoryList({ onRestore, filter = "" }: HistoryListProps) {
       {entries.map((entry) => (
         <div
           key={entry.id}
-          onClick={() => onRestore(toDraft(entry))}
+          onClick={() => {
+            onRestore(toDraft(entry));
+          }}
           className="flex cursor-pointer flex-col gap-0.5 rounded-sm px-2 py-1 hover:bg-surface-2"
         >
           <div className="flex items-center gap-2">
@@ -88,7 +95,9 @@ export function HistoryList({ onRestore, filter = "" }: HistoryListProps) {
             void clear();
             setShowClearConfirm(false);
           }}
-          onCancel={() => setShowClearConfirm(false)}
+          onCancel={() => {
+            setShowClearConfirm(false);
+          }}
         />
       )}
     </div>

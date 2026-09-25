@@ -28,7 +28,8 @@
   --color-status-client-error: #d9903f;
   --color-status-server-error: #e0605f;
 
-  --font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-mono:
+    "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
 }
 
 :root {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { TabBar } from "./components/TabBar";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { RequestEditor } from "./features/requests/RequestEditor";
@@ -18,7 +18,7 @@ import { ApiaryHttpError, cancelRequest, sendRequest } from "./lib/tauri";
 import type { RequestDraft } from "./types/http";
 import type { SavedRequest } from "./types/request";
 
-function App() {
+function App(): JSX.Element {
   const tabs = useTabsStore((s) => s.tabs);
   const activeTabId = useTabsStore((s) => s.activeTabId);
   const hydrateTabs = useTabsStore((s) => s.hydrate);
@@ -38,7 +38,9 @@ function App() {
   const loadHistory = useHistoryStore((s) => s.load);
   const appendHistoryEntry = useHistoryStore((s) => s.append);
 
-  const [editingEnvironmentId, setEditingEnvironmentId] = useState<string | null>(null);
+  const [editingEnvironmentId, setEditingEnvironmentId] = useState<
+    string | null
+  >(null);
   const [savingTabId, setSavingTabId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -59,9 +61,12 @@ function App() {
 
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? null;
 
-  async function handleSend() {
+  async function handleSend(): Promise<void> {
     if (!activeTab) return;
-    const { payload, missing } = resolveDraft(activeTab.draft, activeVariables());
+    const { payload, missing } = resolveDraft(
+      activeTab.draft,
+      activeVariables(),
+    );
     if (!payload) {
       setResponse(activeTab.id, { status: "blocked", missing });
       return;
@@ -112,12 +117,12 @@ function App() {
     }
   }
 
-  function handleCancel() {
+  function handleCancel(): void {
     if (!activeTab || activeTab.response.status !== "sending") return;
     void cancelRequest(activeTab.response.requestId);
   }
 
-  function handleSave() {
+  function handleSave(): void {
     if (!activeTab) return;
     if (activeTab.requestId) {
       void updateSavedRequest(activeTab.requestId, {
@@ -137,13 +142,18 @@ function App() {
 
   function findCollectionIdForRequest(requestId: string): string {
     const { requestsByCollection } = useCollectionsStore.getState();
-    for (const [collectionId, requests] of Object.entries(requestsByCollection)) {
+    for (const [collectionId, requests] of Object.entries(
+      requestsByCollection,
+    )) {
       if (requests.some((r) => r.id === requestId)) return collectionId;
     }
     return "";
   }
 
-  async function handleConfirmSave(collectionId: string, name: string) {
+  async function handleConfirmSave(
+    collectionId: string,
+    name: string,
+  ): Promise<void> {
     if (!activeTab) return;
     const created = await useCollectionsStore.getState().createRequest({
       collectionId,
@@ -159,7 +169,7 @@ function App() {
     setSavingTabId(null);
   }
 
-  function handleOpenSavedRequest(request: SavedRequest) {
+  function handleOpenSavedRequest(request: SavedRequest): void {
     openRequestTab(request.id, request.name, {
       method: request.method,
       url: request.url,
@@ -170,13 +180,13 @@ function App() {
     });
   }
 
-  function handleRestoreFromHistory(draft: RequestDraft) {
+  function handleRestoreFromHistory(draft: RequestDraft): void {
     const tabId = openNewTab();
     updateDraft(tabId, draft);
   }
 
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
+    function handleKeyDown(event: KeyboardEvent): void {
       const action = matchShortcut(event);
       if (!action) return;
 
@@ -209,7 +219,9 @@ function App() {
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return (): void => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [activeTab, openNewTab, closeTab]);
 
   return (
@@ -225,16 +237,24 @@ function App() {
             type="text"
             placeholder="Search (Cmd+K)"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+            }}
             className="h-8 w-full rounded-sm border border-surface-3 bg-surface-2 px-2 text-sm text-text-primary outline-none focus:border-accent"
           />
         </div>
-        <CollectionsSidebar onOpenRequest={handleOpenSavedRequest} filter={searchTerm} />
+        <CollectionsSidebar
+          onOpenRequest={handleOpenSavedRequest}
+          filter={searchTerm}
+        />
         <div className="border-t border-surface-3">
           <EnvironmentSwitcher onEdit={setEditingEnvironmentId} />
         </div>
         <div className="border-t border-surface-3">
-          <HistoryList onRestore={handleRestoreFromHistory} filter={searchTerm} />
+          <HistoryList
+            onRestore={handleRestoreFromHistory}
+            filter={searchTerm}
+          />
         </div>
       </aside>
 
@@ -244,7 +264,9 @@ function App() {
           {activeTab ? (
             <RequestEditor
               tab={activeTab}
-              onUpdateDraft={(patch) => updateDraft(activeTab.id, patch)}
+              onUpdateDraft={(patch) => {
+                updateDraft(activeTab.id, patch);
+              }}
               onSend={() => void handleSend()}
               onSave={handleSave}
             />
@@ -254,7 +276,12 @@ function App() {
             </div>
           )}
           <div className="h-64 border-t border-surface-3">
-            {activeTab && <ResponsePanel response={activeTab.response} onCancel={handleCancel} />}
+            {activeTab && (
+              <ResponsePanel
+                response={activeTab.response}
+                onCancel={handleCancel}
+              />
+            )}
           </div>
         </div>
       </main>
@@ -262,15 +289,23 @@ function App() {
       {editingEnvironmentId && (
         <EnvironmentEditor
           environmentId={editingEnvironmentId}
-          onClose={() => setEditingEnvironmentId(null)}
+          onClose={() => {
+            setEditingEnvironmentId(null);
+          }}
         />
       )}
 
       {savingTabId && activeTab && (
         <SaveRequestDialog
-          suggestedName={activeTab.name === "Untitled Request" ? "" : activeTab.name}
-          onCancel={() => setSavingTabId(null)}
-          onConfirm={(collectionId, name) => void handleConfirmSave(collectionId, name)}
+          suggestedName={
+            activeTab.name === "Untitled Request" ? "" : activeTab.name
+          }
+          onCancel={() => {
+            setSavingTabId(null);
+          }}
+          onConfirm={(collectionId, name) =>
+            void handleConfirmSave(collectionId, name)
+          }
         />
       )}
     </div>

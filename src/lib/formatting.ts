@@ -18,8 +18,8 @@ export function parseQueryString(url: string): {
     const [key, ...rest] = pair.split("=");
     return {
       id: crypto.randomUUID(),
-      key: decodeURIComponent(key ?? ""),
-      value: decodeURIComponent(rest.join("=") ?? ""),
+      key: decodeURIComponent(key),
+      value: decodeURIComponent(rest.join("=")),
       enabled: true,
     };
   });
@@ -27,13 +27,19 @@ export function parseQueryString(url: string): {
 }
 
 /** Rebuilds a full URL from a base and query rows, dropping disabled/empty-key rows. */
-export function buildQueryString(base: string, params: readonly KeyValueRow[]): string {
+export function buildQueryString(
+  base: string,
+  params: readonly KeyValueRow[],
+): string {
   const active = params.filter((row) => row.enabled && row.key.length > 0);
   if (active.length === 0) {
     return base;
   }
   const query = active
-    .map((row) => `${encodeURIComponent(row.key)}=${encodeURIComponent(row.value)}`)
+    .map(
+      (row) =>
+        `${encodeURIComponent(row.key)}=${encodeURIComponent(row.value)}`,
+    )
     .join("&");
   return `${base}?${query}`;
 }
@@ -58,7 +64,7 @@ export function mergeQueryParamsFromUrl(
 export function ensureTrailingEmptyRow(
   rows: readonly KeyValueRow[],
 ): readonly KeyValueRow[] {
-  const last = rows[rows.length - 1];
+  const last = rows.at(-1);
   if (!last || last.key.length > 0 || last.value.length > 0) {
     return [...rows, createEmptyRow()];
   }
@@ -76,9 +82,12 @@ export function formatDuration(ms: number): string {
   return `${(ms / 1000).toFixed(2)}s`;
 }
 
-export function tryFormatJson(raw: string): { formatted: string; isJson: boolean } {
+export function tryFormatJson(raw: string): {
+  formatted: string;
+  isJson: boolean;
+} {
   try {
-    const parsed = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
     return { formatted: JSON.stringify(parsed, null, 2), isJson: true };
   } catch {
     return { formatted: raw, isJson: false };

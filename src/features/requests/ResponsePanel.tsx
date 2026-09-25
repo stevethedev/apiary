@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import Editor from "@monaco-editor/react";
 import { useTheme } from "../../components/ThemeProvider";
-import { formatBytes, formatDuration, tryFormatJson } from "../../lib/formatting";
+import {
+  formatBytes,
+  formatDuration,
+  tryFormatJson,
+} from "../../lib/formatting";
 import { monacoThemeName } from "../../lib/theme";
 import type { HttpErrorKind } from "../../types/http";
 import type { TabResponseState } from "../../types/tab";
@@ -28,8 +32,12 @@ function statusColorClass(statusCode: number): string {
   return "text-status-server-error";
 }
 
-function parseSetCookieHeaders(headers: readonly (readonly [string, string])[]): string[] {
-  return headers.filter(([key]) => key.toLowerCase() === "set-cookie").map(([, value]) => value);
+function parseSetCookieHeaders(
+  headers: readonly (readonly [string, string])[],
+): string[] {
+  return headers
+    .filter(([key]) => key.toLowerCase() === "set-cookie")
+    .map(([, value]) => value);
 }
 
 interface ResponsePanelProps {
@@ -37,8 +45,13 @@ interface ResponsePanelProps {
   onCancel: () => void;
 }
 
-export function ResponsePanel({ response, onCancel }: ResponsePanelProps) {
-  const [activeTab, setActiveTab] = useState<"Body" | "Headers" | "Cookies">("Body");
+export function ResponsePanel({
+  response,
+  onCancel,
+}: ResponsePanelProps): JSX.Element {
+  const [activeTab, setActiveTab] = useState<"Body" | "Headers" | "Cookies">(
+    "Body",
+  );
   const { effectiveTheme } = useTheme();
 
   if (response.status === "idle") {
@@ -52,7 +65,9 @@ export function ResponsePanel({ response, onCancel }: ResponsePanelProps) {
   if (response.status === "blocked") {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-1 text-sm">
-        <p className="text-status-client-error">Cannot send — undefined variable(s):</p>
+        <p className="text-status-client-error">
+          Cannot send — undefined variable(s):
+        </p>
         <p className="font-mono text-text-primary">
           {response.missing.map((name) => `{{${name}}}`).join(", ")}
         </p>
@@ -94,18 +109,26 @@ export function ResponsePanel({ response, onCancel }: ResponsePanelProps) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-surface-3 px-3 py-2 font-mono text-sm">
-        <span className={`font-semibold ${statusColorClass(result.statusCode)}`}>
+        <span
+          className={`font-semibold ${statusColorClass(result.statusCode)}`}
+        >
           {result.statusCode} {result.statusText}
         </span>
-        <span className="text-text-muted">{formatDuration(result.durationMs)}</span>
-        <span className="text-text-muted">{formatBytes(result.bodySizeBytes)}</span>
+        <span className="text-text-muted">
+          {formatDuration(result.durationMs)}
+        </span>
+        <span className="text-text-muted">
+          {formatBytes(result.bodySizeBytes)}
+        </span>
       </div>
       <div className="flex border-b border-surface-3 text-sm">
         {(["Body", "Headers", "Cookies"] as const).map((label) => (
           <button
             key={label}
             type="button"
-            onClick={() => setActiveTab(label)}
+            onClick={() => {
+              setActiveTab(label);
+            }}
             className={`px-4 py-2 ${
               activeTab === label
                 ? "border-b-2 border-accent text-text-primary"
@@ -121,7 +144,8 @@ export function ResponsePanel({ response, onCancel }: ResponsePanelProps) {
           (isLarge ? (
             <div>
               <p className="p-2 text-xs text-text-muted">
-                Large response ({formatBytes(result.bodySizeBytes)}) — formatting disabled.
+                Large response ({formatBytes(result.bodySizeBytes)}) —
+                formatting disabled.
               </p>
               <pre className="whitespace-pre-wrap break-all p-3 font-mono text-sm text-text-primary">
                 {result.body}
@@ -159,7 +183,9 @@ export function ResponsePanel({ response, onCancel }: ResponsePanelProps) {
         )}
         {activeTab === "Cookies" &&
           (cookies.length === 0 ? (
-            <p className="p-3 text-sm text-text-muted">No cookies were set by this response.</p>
+            <p className="p-3 text-sm text-text-muted">
+              No cookies were set by this response.
+            </p>
           ) : (
             <ul className="p-3 font-mono text-sm text-text-primary">
               {cookies.map((cookie, i) => (

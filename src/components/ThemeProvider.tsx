@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type JSX,
+  type ReactNode,
+} from "react";
 import {
   applyThemePreference,
   getStoredThemePreference,
@@ -15,9 +22,16 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>(getStoredThemePreference);
-  const [systemTheme, setSystemTheme] = useState<EffectiveTheme>(getSystemTheme);
+export function ThemeProvider({
+  children,
+}: {
+  children: ReactNode;
+}): JSX.Element {
+  const [preference, setPreferenceState] = useState<ThemePreference>(
+    getStoredThemePreference,
+  );
+  const [systemTheme, setSystemTheme] =
+    useState<EffectiveTheme>(getSystemTheme);
 
   useEffect(() => {
     applyThemePreference(preference);
@@ -25,15 +39,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: light)");
-    const handleChange = () => setSystemTheme(getSystemTheme());
+    const handleChange = (): void => {
+      setSystemTheme(getSystemTheme());
+    };
     media.addEventListener("change", handleChange);
-    return () => media.removeEventListener("change", handleChange);
+    return (): void => {
+      media.removeEventListener("change", handleChange);
+    };
   }, []);
 
   const effectiveTheme = preference === "system" ? systemTheme : preference;
 
   return (
-    <ThemeContext.Provider value={{ preference, effectiveTheme, setPreference: setPreferenceState }}>
+    <ThemeContext.Provider
+      value={{ preference, effectiveTheme, setPreference: setPreferenceState }}
+    >
       {children}
     </ThemeContext.Provider>
   );

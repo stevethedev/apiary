@@ -32,7 +32,9 @@ export function applyThemePreference(preference: ThemePreference): void {
 }
 
 export function getSystemTheme(): EffectiveTheme {
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  return window.matchMedia("(prefers-color-scheme: light)").matches
+    ? "light"
+    : "dark";
 }
 
 export function monacoThemeName(effectiveTheme: EffectiveTheme): string {

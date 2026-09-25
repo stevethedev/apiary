@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { matchShortcut } from "./keyboardShortcuts";
 
-function event(key: string, mod: "meta" | "ctrl" | "none" = "meta") {
+function event(
+  key: string,
+  mod: "meta" | "ctrl" | "none" = "meta",
+): { key: string; metaKey: boolean; ctrlKey: boolean } {
   return {
     key,
     metaKey: mod === "meta",

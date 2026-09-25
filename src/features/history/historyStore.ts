@@ -16,17 +16,17 @@ export const useHistoryStore = create<HistoryState>((set) => ({
   entries: [],
   loaded: false,
 
-  load: async () => {
+  load: async (): Promise<void> => {
     const entries = await api.listHistory(PAGE_SIZE, 0);
     set({ entries, loaded: true });
   },
 
-  append: async (input) => {
+  append: async (input): Promise<void> => {
     const entry = await api.appendHistory(input);
     set((state) => ({ entries: [entry, ...state.entries] }));
   },
 
-  clear: async () => {
+  clear: async (): Promise<void> => {
     await api.clearHistory();
     set({ entries: [] });
   },

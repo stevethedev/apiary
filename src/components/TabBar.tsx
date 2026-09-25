@@ -1,7 +1,8 @@
+import type { JSX } from "react";
 import { MethodBadge } from "./MethodBadge";
 import { useTabsStore } from "../features/requests/tabsStore";
 
-export function TabBar() {
+export function TabBar(): JSX.Element {
   const tabs = useTabsStore((s) => s.tabs);
   const activeTabId = useTabsStore((s) => s.activeTabId);
   const setActiveTab = useTabsStore((s) => s.setActiveTab);
@@ -16,7 +17,9 @@ export function TabBar() {
           return (
             <div
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+              }}
               className={`group flex min-w-[140px] max-w-[220px] cursor-pointer items-center gap-2 border-r border-surface-3 px-3 text-sm ${
                 isActive
                   ? "bg-surface-2 text-text-primary"

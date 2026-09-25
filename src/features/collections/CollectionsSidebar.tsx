@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -30,7 +30,8 @@ interface CollectionsSidebarProps {
 function matchesFilter(request: SavedRequest, filter: string): boolean {
   const needle = filter.toLowerCase();
   return (
-    request.name.toLowerCase().includes(needle) || request.url.toLowerCase().includes(needle)
+    request.name.toLowerCase().includes(needle) ||
+    request.url.toLowerCase().includes(needle)
   );
 }
 
@@ -40,13 +41,21 @@ function SortableRequestRow({
 }: {
   request: SavedRequest;
   onOpenRequest: (request: SavedRequest) => void;
-}) {
-  const { deleteRequest, duplicateRequest, updateRequest } = useCollectionsStore();
+}): JSX.Element {
+  const { deleteRequest, duplicateRequest, updateRequest } =
+    useCollectionsStore();
   const [renaming, setRenaming] = useState(false);
   const [draftName, setDraftName] = useState(request.name);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: request.id,
   });
   const style = {
@@ -55,7 +64,7 @@ function SortableRequestRow({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  function commitRename() {
+  function commitRename(): void {
     setRenaming(false);
     const trimmed = draftName.trim();
     if (trimmed.length > 0 && trimmed !== request.name) {
@@ -71,7 +80,9 @@ function SortableRequestRow({
       style={style}
       {...attributes}
       {...listeners}
-      onClick={() => !renaming && onOpenRequest(request)}
+      onClick={() => {
+        if (!renaming) onOpenRequest(request);
+      }}
       className="group flex cursor-pointer items-center gap-2 rounded-sm py-1 pl-8 pr-2 text-sm text-text-secondary hover:bg-surface-2 hover:text-text-primary"
     >
       <MethodBadge method={request.method} />
@@ -80,8 +91,12 @@ function SortableRequestRow({
           autoFocus
           className="flex-1 bg-transparent text-text-primary outline-none"
           value={draftName}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => setDraftName(e.target.value)}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          onChange={(e) => {
+            setDraftName(e.target.value);
+          }}
           onBlur={commitRename}
           onKeyDown={(e) => {
             if (e.key === "Enter") commitRename();
@@ -96,12 +111,22 @@ function SortableRequestRow({
       )}
       <RowMenu
         items={[
-          { label: "Rename", onClick: () => setRenaming(true) },
-          { label: "Duplicate", onClick: () => void duplicateRequest(request.id) },
+          {
+            label: "Rename",
+            onClick: (): void => {
+              setRenaming(true);
+            },
+          },
+          {
+            label: "Duplicate",
+            onClick: (): void => void duplicateRequest(request.id),
+          },
           {
             label: "Delete",
             danger: true,
-            onClick: () => setShowDeleteConfirm(true),
+            onClick: (): void => {
+              setShowDeleteConfirm(true);
+            },
           },
         ]}
       />
@@ -116,7 +141,9 @@ function SortableRequestRow({
             void deleteRequest(request.id);
             setShowDeleteConfirm(false);
           }}
-          onCancel={() => setShowDeleteConfirm(false)}
+          onCancel={() => {
+            setShowDeleteConfirm(false);
+          }}
         />
       )}
     </div>
@@ -151,8 +178,15 @@ function SortableCollectionSection({
   onNewRequest,
   onDelete,
   onOpenRequest,
-}: SortableCollectionSectionProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+}: SortableCollectionSectionProps): JSX.Element {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: collection.id,
   });
   const style = {
@@ -167,7 +201,9 @@ function SortableCollectionSection({
         {...attributes}
         {...listeners}
         className="group flex cursor-pointer items-center gap-1 rounded-sm px-1 py-1 hover:bg-surface-2"
-        onClick={() => !isRenaming && onToggleExpanded()}
+        onClick={() => {
+          if (!isRenaming) onToggleExpanded();
+        }}
       >
         <span className="w-3 text-text-muted">{isExpanded ? "▾" : "▸"}</span>
         {isRenaming ? (
@@ -175,8 +211,12 @@ function SortableCollectionSection({
             autoFocus
             className="flex-1 bg-transparent text-text-primary outline-none"
             value={draftName}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => onDraftNameChange(e.target.value)}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            onChange={(e) => {
+              onDraftNameChange(e.target.value);
+            }}
             onBlur={onCommitRename}
             onKeyDown={(e) => {
               if (e.key === "Enter") e.currentTarget.blur();
@@ -212,7 +252,11 @@ function SortableCollectionSection({
           strategy={verticalListSortingStrategy}
         >
           {requests.map((request) => (
-            <SortableRequestRow key={request.id} request={request} onOpenRequest={onOpenRequest} />
+            <SortableRequestRow
+              key={request.id}
+              request={request}
+              onOpenRequest={onOpenRequest}
+            />
           ))}
         </SortableContext>
       )}
@@ -220,7 +264,10 @@ function SortableCollectionSection({
   );
 }
 
-export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSidebarProps) {
+export function CollectionsSidebar({
+  onOpenRequest,
+  filter = "",
+}: CollectionsSidebarProps): JSX.Element {
   const {
     collections,
     requestsByCollection,
@@ -232,15 +279,21 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
     reorderCollections,
   } = useCollectionsStore();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [renamingCollectionId, setRenamingCollectionId] = useState<string | null>(null);
+  const [renamingCollectionId, setRenamingCollectionId] = useState<
+    string | null
+  >(null);
   const [collectionDraftName, setCollectionDraftName] = useState("");
   const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false);
-  const [deletingCollectionId, setDeletingCollectionId] = useState<string | null>(null);
+  const [deletingCollectionId, setDeletingCollectionId] = useState<
+    string | null
+  >(null);
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+  );
   const isFiltering = filter.trim().length > 0;
 
-  function toggleExpanded(id: string) {
+  function toggleExpanded(id: string): void {
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -254,7 +307,7 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
   // disallows nesting multiple DndContexts, not nesting SortableContexts,
   // so this dispatches on what kind of id was dragged instead of using two
   // separate drag managers.
-  function handleDragEnd(event: DragEndEvent) {
+  function handleDragEnd(event: DragEndEvent): void {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -286,13 +339,13 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
     );
   }
 
-  async function handleNewCollection(name: string) {
+  async function handleNewCollection(name: string): Promise<void> {
     const collection = await createCollection(name);
     setExpanded((prev) => new Set(prev).add(collection.id));
     setShowNewCollectionDialog(false);
   }
 
-  async function handleNewRequest(collectionId: string) {
+  async function handleNewRequest(collectionId: string): Promise<void> {
     const draft = createEmptyDraft();
     const request = await createRequest({
       collectionId,
@@ -326,7 +379,9 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
       isExpanded={isFiltering || expanded.has(collection.id)}
       isRenaming={renamingCollectionId === collection.id}
       draftName={collectionDraftName}
-      onToggleExpanded={() => toggleExpanded(collection.id)}
+      onToggleExpanded={() => {
+        toggleExpanded(collection.id);
+      }}
       onDraftNameChange={setCollectionDraftName}
       onCommitRename={() => {
         setRenamingCollectionId(null);
@@ -340,7 +395,9 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
         setRenamingCollectionId(collection.id);
       }}
       onNewRequest={() => void handleNewRequest(collection.id)}
-      onDelete={() => setDeletingCollectionId(collection.id)}
+      onDelete={() => {
+        setDeletingCollectionId(collection.id);
+      }}
       onOpenRequest={onOpenRequest}
     />
   ));
@@ -353,7 +410,9 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
           type="button"
           aria-label="New collection"
           className="rounded-sm px-1.5 hover:bg-surface-2 hover:text-text-primary"
-          onClick={() => setShowNewCollectionDialog(true)}
+          onClick={() => {
+            setShowNewCollectionDialog(true);
+          }}
         >
           +
         </button>
@@ -362,7 +421,11 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
       {isFiltering ? (
         sections
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
           <SortableContext
             items={visibleCollections.map(({ collection }) => collection.id)}
             strategy={verticalListSortingStrategy}
@@ -379,7 +442,9 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
           placeholder="Users API"
           confirmLabel="Create"
           onConfirm={(name) => void handleNewCollection(name)}
-          onCancel={() => setShowNewCollectionDialog(false)}
+          onCancel={() => {
+            setShowNewCollectionDialog(false);
+          }}
         />
       )}
 
@@ -395,7 +460,9 @@ export function CollectionsSidebar({ onOpenRequest, filter = "" }: CollectionsSi
             void deleteCollection(deletingCollectionId);
             setDeletingCollectionId(null);
           }}
-          onCancel={() => setDeletingCollectionId(null)}
+          onCancel={() => {
+            setDeletingCollectionId(null);
+          }}
         />
       )}
     </div>

@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { useEnvironmentStore } from "./environmentStore";
 
 const NONE_VALUE = "__none__";
@@ -5,14 +6,16 @@ const NONE_VALUE = "__none__";
 /** A second, more visible surface for switching the active environment,
  * right next to Send — the sidebar's EnvironmentSwitcher remains the place
  * to create/edit environments and their variables. */
-export function EnvironmentDropdown() {
+export function EnvironmentDropdown(): JSX.Element {
   const environments = useEnvironmentStore((s) => s.environments);
   const setActive = useEnvironmentStore((s) => s.setActive);
   const clearActive = useEnvironmentStore((s) => s.clearActive);
   const activeId = environments.find((e) => e.isActive)?.id ?? NONE_VALUE;
 
   if (environments.length === 0) {
-    return <span className="px-1 text-xs text-text-muted">No environments</span>;
+    return (
+      <span className="px-1 text-xs text-text-muted">No environments</span>
+    );
   }
 
   return (
