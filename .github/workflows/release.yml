@@ -9,7 +9,17 @@ permissions:
   contents: write
 
 jobs:
+  # rust.yml/typescript.yml only trigger on pushes to main/PRs, not tag
+  # pushes, so a release build would otherwise skip verification entirely
+  # for the exact commit being tagged. Re-run both here as a gate.
+  verify-rust:
+    uses: ./.github/workflows/rust.yml
+
+  verify-typescript:
+    uses: ./.github/workflows/typescript.yml
+
   build-and-release:
+    needs: [verify-rust, verify-typescript]
     strategy:
       fail-fast: false
       matrix:
