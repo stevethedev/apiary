@@ -38,7 +38,7 @@ jobs:
       # `publish`, which tags the release commit instead of publishing to
       # npm — pushing the tag triggers release.yml's cross-platform build.
       - name: Version or release
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           version: pnpm version
           publish: node scripts/tag-release.mjs
