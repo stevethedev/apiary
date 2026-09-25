@@ -1,0 +1,25 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#232428"/>
+      <stop offset="100%" stop-color="#17181b"/>
+    </linearGradient>
+    <linearGradient id="cell" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffc55c"/>
+      <stop offset="100%" stop-color="#f5a623"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="url(#bg)"/>
+
+  <g stroke="#f5a623" stroke-width="16" fill="none" stroke-linejoin="round">
+    <polygon points="706.0,400.0 803.0,456.0 803.0,568.0 706.0,624.0 609.0,568.0 609.0,456.0"/>
+    <polygon points="609.0,232.0 706.0,288.0 706.0,400.0 609.0,456.0 512.0,400.0 512.0,288.0"/>
+    <polygon points="415.0,232.0 512.0,288.0 512.0,400.0 415.0,456.0 318.0,400.0 318.0,288.0"/>
+    <polygon points="318.0,400.0 415.0,456.0 415.0,568.0 318.0,624.0 221.0,568.0 221.0,456.0"/>
+    <polygon points="415.0,568.0 512.0,624.0 512.0,736.0 415.0,792.0 318.0,736.0 318.0,624.0"/>
+    <polygon points="609.0,568.0 706.0,624.0 706.0,736.0 609.0,792.0 512.0,736.0 512.0,624.0"/>
+  </g>
+
+  <polygon points="512.0,400.0 609.0,456.0 609.0,568.0 512.0,624.0 415.0,568.0 415.0,456.0" fill="url(#cell)"/>
+</svg>

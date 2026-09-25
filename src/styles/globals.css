@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme {
+  /* Dark-first surface layers (VS Code / Linear inspired) — these are the
+   * default values; light mode overrides them below without touching any
+   * component, since components only ever use the token utility classes. */
+  --color-surface-0: #1a1b1e;
+  --color-surface-1: #202124;
+  --color-surface-2: #27282b;
+  --color-surface-3: #313235;
+  --color-border: #3a3b3e;
+  --color-text-primary: #e4e4e6;
+  --color-text-secondary: #9a9ba0;
+  --color-text-muted: #6b6c70;
+  --color-accent: #6ea8fe;
+
+  /* HTTP method colors — used sparingly, never as full-panel backgrounds */
+  --color-method-get: #4fb477;
+  --color-method-post: #4a90d9;
+  --color-method-put: #d9903f;
+  --color-method-patch: #d9903f;
+  --color-method-delete: #e0605f;
+  --color-method-head: #9a9ba0;
+  --color-method-options: #9a9ba0;
+
+  --color-status-success: #4fb477;
+  --color-status-redirect: #d9c23f;
+  --color-status-client-error: #d9903f;
+  --color-status-server-error: #e0605f;
+
+  --font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+/* System preference, when the user hasn't made an explicit choice
+ * (`data-theme` unset). Explicit dark stays dark even if the OS is light. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --color-surface-0: #ffffff;
+    --color-surface-1: #f6f6f7;
+    --color-surface-2: #ececee;
+    --color-surface-3: #dcdce0;
+    --color-border: #d7d7db;
+    --color-text-primary: #1c1d1f;
+    --color-text-secondary: #55565c;
+    --color-text-muted: #86878d;
+    --color-accent: #2f6fed;
+
+    --color-method-get: #1f8a4c;
+    --color-method-post: #1f66b0;
+    --color-method-put: #b56a1f;
+    --color-method-patch: #b56a1f;
+    --color-method-delete: #c23b3a;
+    --color-method-head: #6b6c72;
+    --color-method-options: #6b6c72;
+
+    --color-status-success: #1f8a4c;
+    --color-status-redirect: #a68a1f;
+    --color-status-client-error: #b56a1f;
+    --color-status-server-error: #c23b3a;
+  }
+}
+
+/* Explicit user choice, regardless of OS preference. Higher specificity
+ * than the media-query rule above, so it always wins. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-surface-0: #ffffff;
+  --color-surface-1: #f6f6f7;
+  --color-surface-2: #ececee;
+  --color-surface-3: #dcdce0;
+  --color-border: #d7d7db;
+  --color-text-primary: #1c1d1f;
+  --color-text-secondary: #55565c;
+  --color-text-muted: #86878d;
+  --color-accent: #2f6fed;
+
+  --color-method-get: #1f8a4c;
+  --color-method-post: #1f66b0;
+  --color-method-put: #b56a1f;
+  --color-method-patch: #b56a1f;
+  --color-method-delete: #c23b3a;
+  --color-method-head: #6b6c72;
+  --color-method-options: #6b6c72;
+
+  --color-status-success: #1f8a4c;
+  --color-status-redirect: #a68a1f;
+  --color-status-client-error: #b56a1f;
+  --color-status-server-error: #c23b3a;
+}
+
+body {
+  background-color: var(--color-surface-0);
+  color: var(--color-text-primary);
+}
