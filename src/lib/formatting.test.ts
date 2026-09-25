@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildQueryString, formatBytes, formatDuration, parseQueryString } from "./formatting";
+import {
+  buildQueryString,
+  formatBytes,
+  formatDuration,
+  mergeQueryParamsFromUrl,
+  parseQueryString,
+} from "./formatting";
 
 describe("parseQueryString", () => {
   it("splits a url with no query string", () => {
@@ -41,6 +47,44 @@ describe("buildQueryString", () => {
     const original = "https://api.example.com/users?page=1&status=active";
     const { base, params } = parseQueryString(original);
     expect(buildQueryString(base, params)).toBe(original);
+  });
+});
+
+describe("mergeQueryParamsFromUrl", () => {
+  // Regression test for a Copilot-flagged bug: buildQueryString only shows
+  // *enabled* rows in the URL bar, so naively re-parsing the visible URL
+  // string on every edit (via parseQueryString alone) silently drops any
+  // disabled row — it was never in the string to begin with.
+  it("preserves a disabled param row across an unrelated url edit", () => {
+    const currentParams = [
+      { id: "1", key: "page", value: "1", enabled: true },
+      { id: "2", key: "limit", value: "20", enabled: false },
+    ];
+
+    const { params } = mergeQueryParamsFromUrl(
+      currentParams,
+      "https://api.example.com/users?page=2",
+    );
+
+    const limitRow = params.find((p) => p.key === "limit");
+    expect(limitRow).toBeDefined();
+    expect(limitRow?.enabled).toBe(false);
+    expect(limitRow?.value).toBe("20");
+  });
+
+  it("updates enabled rows from the url and keeps the base", () => {
+    const currentParams = [{ id: "1", key: "page", value: "1", enabled: true }];
+
+    const { base, params } = mergeQueryParamsFromUrl(
+      currentParams,
+      "https://api.example.com/users?page=2&status=active",
+    );
+
+    expect(base).toBe("https://api.example.com/users");
+    expect(params.map((p) => [p.key, p.value, p.enabled])).toEqual([
+      ["page", "2", true],
+      ["status", "active", true],
+    ]);
   });
 });
 

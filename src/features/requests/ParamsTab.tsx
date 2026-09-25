@@ -2,8 +2,8 @@ import { KeyValueEditor } from "../../components/KeyValueEditor";
 import type { KeyValueRow } from "../../types/http";
 
 interface ParamsTabProps {
-  params: KeyValueRow[];
-  onChange: (params: KeyValueRow[]) => void;
+  params: readonly KeyValueRow[];
+  onChange: (params: readonly KeyValueRow[]) => void;
 }
 
 export function ParamsTab({ params, onChange }: ParamsTabProps) {

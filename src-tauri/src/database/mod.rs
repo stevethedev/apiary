@@ -1,7 +1,7 @@
 pub mod connection;
 pub mod migrations;
 
-use std::sync::Mutex;
+use std::sync::{Mutex, MutexGuard};
 
 use rusqlite::Connection;
 use serde::Serialize;
@@ -32,7 +32,7 @@ impl From<serde_json::Error> for DbError {
 /// Tauri-managed state wrapping the single SQLite connection. Commands are
 /// synchronous and simply lock this for the duration of a query.
 pub struct DbState {
-    pub conn: Mutex<Connection>,
+    conn: Mutex<Connection>,
 }
 
 impl DbState {
@@ -40,6 +40,19 @@ impl DbState {
         Self {
             conn: Mutex::new(conn),
         }
+    }
+
+    /// Locks the connection, recovering from a poisoned mutex instead of
+    /// panicking. Every command handler goes through this rather than
+    /// `.conn.lock().unwrap()` directly: with 25+ call sites sharing one
+    /// mutex, a panic while any single command held the lock would
+    /// otherwise poison it and take down every subsequent DB command for
+    /// the rest of the process's life. A `rusqlite::Connection` has no
+    /// invariant that a panic mid-query could leave "torn" — the worse
+    /// case is an already-observed SQLite error — so recovering here is
+    /// safe and keeps one bad request from cascading into a full outage.
+    pub fn connection(&self) -> MutexGuard<'_, Connection> {
+        self.conn.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 }
 

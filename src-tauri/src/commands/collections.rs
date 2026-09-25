@@ -16,7 +16,7 @@ fn row_to_collection(row: &rusqlite::Row) -> rusqlite::Result<Collection> {
 
 #[tauri::command]
 pub fn list_collections(state: State<'_, DbState>) -> Result<Vec<Collection>, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let mut stmt = conn.prepare(
         "SELECT id, name, sort_order, created_at, updated_at FROM collections ORDER BY sort_order",
     )?;
@@ -28,7 +28,7 @@ pub fn list_collections(state: State<'_, DbState>) -> Result<Vec<Collection>, Db
 
 #[tauri::command]
 pub fn create_collection(state: State<'_, DbState>, name: String) -> Result<Collection, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let id = new_id();
     let timestamp = now();
     let next_order: i64 = conn.query_row(
@@ -56,7 +56,7 @@ pub fn rename_collection(
     id: String,
     name: String,
 ) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     conn.execute(
         "UPDATE collections SET name = ?1, updated_at = ?2 WHERE id = ?3",
         params![name, now(), id],
@@ -66,7 +66,7 @@ pub fn rename_collection(
 
 #[tauri::command]
 pub fn delete_collection(state: State<'_, DbState>, id: String) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     conn.execute("DELETE FROM collections WHERE id = ?1", params![id])?;
     Ok(())
 }
@@ -76,12 +76,14 @@ pub fn reorder_collections(
     state: State<'_, DbState>,
     ordered_ids: Vec<String>,
 ) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let mut conn = state.connection();
+    let tx = conn.transaction()?;
     for (index, id) in ordered_ids.iter().enumerate() {
-        conn.execute(
+        tx.execute(
             "UPDATE collections SET sort_order = ?1 WHERE id = ?2",
             params![index as i64, id],
         )?;
     }
+    tx.commit()?;
     Ok(())
 }

@@ -74,9 +74,9 @@ export function EnvironmentEditor({
 }) {
   const { environments, setVariables, deleteEnvironment } = useEnvironmentStore();
   const environment = environments.find((e) => e.id === environmentId);
-  const [variables, setLocalVariables] = useState<EnvironmentVariable[]>(
-    environment?.variables ?? [],
-  );
+  const [variables, setLocalVariables] = useState<EnvironmentVariable[]>(() => [
+    ...(environment?.variables ?? []),
+  ]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (!environment) return null;

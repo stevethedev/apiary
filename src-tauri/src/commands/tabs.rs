@@ -30,7 +30,7 @@ fn row_to_tab(row: &rusqlite::Row) -> rusqlite::Result<OpenTab> {
 
 #[tauri::command]
 pub fn load_open_tabs(state: State<'_, DbState>) -> Result<Vec<OpenTab>, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let mut stmt = conn.prepare("SELECT * FROM open_tabs ORDER BY sort_order")?;
     let rows = stmt
         .query_map([], row_to_tab)?
@@ -43,7 +43,7 @@ pub fn load_open_tabs(state: State<'_, DbState>) -> Result<Vec<OpenTab>, DbError
 /// (debounced on the frontend) on every tab-set/draft mutation.
 #[tauri::command]
 pub fn save_open_tabs(state: State<'_, DbState>, tabs: Vec<OpenTab>) -> Result<(), DbError> {
-    let mut conn = state.conn.lock().unwrap();
+    let mut conn = state.connection();
     let tx = conn.transaction()?;
     tx.execute("DELETE FROM open_tabs", [])?;
     let timestamp = now();

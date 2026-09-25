@@ -1,5 +1,5 @@
 import { HTTP_METHODS, type HttpMethod, type RequestDraft } from "../../types/http";
-import { buildQueryString, parseQueryString } from "../../lib/formatting";
+import { buildQueryString, mergeQueryParamsFromUrl } from "../../lib/formatting";
 import { EnvironmentDropdown } from "../environments/EnvironmentDropdown";
 
 const METHOD_SELECT_COLOR: Record<HttpMethod, string> = {
@@ -26,7 +26,7 @@ export function UrlBar({ draft, onChange, onSend, onSave, sendDisabled }: UrlBar
   const fullUrl = buildQueryString(draft.url, draft.params);
 
   function handleUrlChange(value: string) {
-    const { base, params } = parseQueryString(value);
+    const { base, params } = mergeQueryParamsFromUrl(draft.params, value);
     onChange({ url: base, params });
   }
 

@@ -9,37 +9,37 @@ import type {
 } from "./http";
 
 export type TabResponseState =
-  | { status: "idle" }
-  | { status: "sending"; requestId: string }
-  | { status: "success"; result: HttpResponseResult }
-  | { status: "error"; error: HttpErrorResult }
-  | { status: "blocked"; missing: string[] };
+  | { readonly status: "idle" }
+  | { readonly status: "sending"; readonly requestId: string }
+  | { readonly status: "success"; readonly result: HttpResponseResult }
+  | { readonly status: "error"; readonly error: HttpErrorResult }
+  | { readonly status: "blocked"; readonly missing: readonly string[] };
 
 export interface Tab {
-  id: string;
+  readonly id: string;
   /** null for an ad-hoc tab that isn't bound to any saved request. */
-  requestId: string | null;
-  name: string;
-  draft: RequestDraft;
+  readonly requestId: string | null;
+  readonly name: string;
+  readonly draft: RequestDraft;
   /** True when `draft` differs from the last-saved state of `requestId`. */
-  dirty: boolean;
-  response: TabResponseState;
+  readonly dirty: boolean;
+  readonly response: TabResponseState;
 }
 
 /** Mirrors the Rust `OpenTab` row shape used to persist the open-tabs set. */
 export interface StoredTab {
-  id: string;
-  requestId: string | null;
-  name: string;
-  isActive: boolean;
-  sortOrder: number;
-  draftMethod: HttpMethod;
-  draftUrl: string;
-  draftParams: KeyValueRow[];
-  draftHeaders: KeyValueRow[];
-  draftAuth: AuthConfig;
-  draftBody: BodyConfig;
-  isDirty: boolean;
+  readonly id: string;
+  readonly requestId: string | null;
+  readonly name: string;
+  readonly isActive: boolean;
+  readonly sortOrder: number;
+  readonly draftMethod: HttpMethod;
+  readonly draftUrl: string;
+  readonly draftParams: readonly KeyValueRow[];
+  readonly draftHeaders: readonly KeyValueRow[];
+  readonly draftAuth: AuthConfig;
+  readonly draftBody: BodyConfig;
+  readonly isDirty: boolean;
 }
 
 export function tabToStoredTab(tab: Tab, index: number): StoredTab {

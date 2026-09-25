@@ -33,7 +33,7 @@ pub fn list_requests(
     state: State<'_, DbState>,
     collection_id: String,
 ) -> Result<Vec<SavedRequest>, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let mut stmt = conn.prepare(
         "SELECT * FROM requests WHERE collection_id = ?1 ORDER BY sort_order",
     )?;
@@ -45,7 +45,7 @@ pub fn list_requests(
 
 #[tauri::command]
 pub fn get_request(state: State<'_, DbState>, id: String) -> Result<SavedRequest, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let request = conn.query_row(
         "SELECT * FROM requests WHERE id = ?1",
         params![id],
@@ -59,7 +59,7 @@ pub fn create_request(
     state: State<'_, DbState>,
     input: SavedRequestInput,
 ) -> Result<SavedRequest, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let id = new_id();
     let timestamp = now();
     let next_order: i64 = conn.query_row(
@@ -114,7 +114,7 @@ pub fn update_request(
     id: String,
     input: SavedRequestInput,
 ) -> Result<SavedRequest, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let timestamp = now();
 
     let params_json = serde_json::to_string(&input.params)?;
@@ -155,7 +155,7 @@ pub fn duplicate_request(
     state: State<'_, DbState>,
     id: String,
 ) -> Result<SavedRequest, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let original = conn.query_row(
         "SELECT * FROM requests WHERE id = ?1",
         params![id],
@@ -213,7 +213,7 @@ pub fn duplicate_request(
 
 #[tauri::command]
 pub fn delete_request(state: State<'_, DbState>, id: String) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     conn.execute("DELETE FROM requests WHERE id = ?1", params![id])?;
     Ok(())
 }
@@ -224,12 +224,14 @@ pub fn reorder_requests(
     collection_id: String,
     ordered_ids: Vec<String>,
 ) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let mut conn = state.connection();
+    let tx = conn.transaction()?;
     for (index, id) in ordered_ids.iter().enumerate() {
-        conn.execute(
+        tx.execute(
             "UPDATE requests SET sort_order = ?1 WHERE id = ?2 AND collection_id = ?3",
             params![index as i64, id, collection_id],
         )?;
     }
+    tx.commit()?;
     Ok(())
 }

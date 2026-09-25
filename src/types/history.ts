@@ -7,17 +7,17 @@ import type { AuthConfig, BodyConfig, HttpErrorKind, HttpMethod, KeyValueRow } f
  * rewrites what history shows for a past run.
  */
 export interface HistoryEntry {
-  id: string;
-  method: HttpMethod;
-  url: string;
-  params: KeyValueRow[];
-  headers: KeyValueRow[];
-  auth: AuthConfig;
-  body: BodyConfig;
-  statusCode: number | null;
-  durationMs: number | null;
-  responseSizeBytes: number | null;
-  responseHeaders: [string, string][] | null;
-  errorKind: HttpErrorKind | null;
-  executedAt: string;
+  readonly id: string;
+  readonly method: HttpMethod;
+  readonly url: string;
+  readonly params: readonly KeyValueRow[];
+  readonly headers: readonly KeyValueRow[];
+  readonly auth: AuthConfig;
+  readonly body: BodyConfig;
+  readonly statusCode: number | null;
+  readonly durationMs: number | null;
+  readonly responseSizeBytes: number | null;
+  readonly responseHeaders: readonly (readonly [string, string])[] | null;
+  readonly errorKind: HttpErrorKind | null;
+  readonly executedAt: string;
 }

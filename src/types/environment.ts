@@ -1,16 +1,16 @@
 export interface EnvironmentVariable {
-  id: string;
-  key: string;
-  value: string;
-  isSecret: boolean;
-  sortOrder: number;
+  readonly id: string;
+  readonly key: string;
+  readonly value: string;
+  readonly isSecret: boolean;
+  readonly sortOrder: number;
 }
 
 export interface Environment {
-  id: string;
-  name: string;
-  isActive: boolean;
-  variables: EnvironmentVariable[];
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly name: string;
+  readonly isActive: boolean;
+  readonly variables: readonly EnvironmentVariable[];
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }

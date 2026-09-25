@@ -68,7 +68,6 @@ export interface SavedRequestInput {
 
 export const listRequests = (collectionId: string) =>
   invoke<SavedRequest[]>("list_requests", { collectionId });
-export const getRequest = (id: string) => invoke<SavedRequest>("get_request", { id });
 export const createRequest = (input: SavedRequestInput) =>
   invoke<SavedRequest>("create_request", { input });
 export const updateRequest = (id: string, input: SavedRequestInput) =>
@@ -107,7 +106,7 @@ export interface HistoryEntryInput {
   statusCode: number | null;
   durationMs: number | null;
   responseSizeBytes: number | null;
-  responseHeaders: [string, string][] | null;
+  responseHeaders: HistoryEntry["responseHeaders"];
   errorKind: string | null;
 }
 

@@ -9,7 +9,7 @@ function contentTypeDefaultFor(body: BodyConfig): string | null {
 /** Headers actually going over the wire: enabled rows, plus the JSON/form
  * Content-Type default when the user hasn't set their own. */
 export function buildEffectiveHeaders(
-  headers: KeyValueRow[],
+  headers: readonly KeyValueRow[],
   body: BodyConfig,
 ): [string, string][] {
   const active: [string, string][] = headers
@@ -48,7 +48,7 @@ function previewBasicAuthValue(username: string, password: string): string {
  * explicit user row for the same header name always wins and suppresses
  * the generated one, matching what actually happens at send time. */
 export function computeGeneratedHeaders(
-  headers: KeyValueRow[],
+  headers: readonly KeyValueRow[],
   body: BodyConfig,
   auth: AuthConfig,
 ): GeneratedHeader[] {

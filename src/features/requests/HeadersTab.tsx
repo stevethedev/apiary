@@ -3,10 +3,10 @@ import type { AuthConfig, BodyConfig, KeyValueRow } from "../../types/http";
 import { computeGeneratedHeaders } from "./requestBuilder";
 
 interface HeadersTabProps {
-  headers: KeyValueRow[];
+  headers: readonly KeyValueRow[];
   body: BodyConfig;
   auth: AuthConfig;
-  onChange: (headers: KeyValueRow[]) => void;
+  onChange: (headers: readonly KeyValueRow[]) => void;
 }
 
 export function HeadersTab({ headers, body, auth, onChange }: HeadersTabProps) {

@@ -36,7 +36,7 @@ pub fn append_history(
     state: State<'_, DbState>,
     entry: HistoryEntryInput,
 ) -> Result<HistoryEntry, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let id = new_id();
     let timestamp = now();
 
@@ -95,7 +95,7 @@ pub fn list_history(
     limit: i64,
     offset: i64,
 ) -> Result<Vec<HistoryEntry>, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let mut stmt = conn.prepare(
         "SELECT * FROM history ORDER BY executed_at DESC LIMIT ?1 OFFSET ?2",
     )?;
@@ -107,7 +107,7 @@ pub fn list_history(
 
 #[tauri::command]
 pub fn clear_history(state: State<'_, DbState>) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     conn.execute("DELETE FROM history", [])?;
     Ok(())
 }

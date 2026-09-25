@@ -2,8 +2,8 @@ import { createEmptyRow, type KeyValueRow } from "../types/http";
 import { ensureTrailingEmptyRow } from "../lib/formatting";
 
 interface KeyValueEditorProps {
-  rows: KeyValueRow[];
-  onChange: (rows: KeyValueRow[]) => void;
+  rows: readonly KeyValueRow[];
+  onChange: (rows: readonly KeyValueRow[]) => void;
   keyPlaceholder?: string;
   valuePlaceholder?: string;
 }

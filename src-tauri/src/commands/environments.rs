@@ -45,7 +45,7 @@ fn load_environment(conn: &rusqlite::Connection, id: &str) -> Result<Environment
 
 #[tauri::command]
 pub fn list_environments(state: State<'_, DbState>) -> Result<Vec<Environment>, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let mut stmt = conn.prepare("SELECT id FROM environments ORDER BY created_at")?;
     let ids: Vec<String> = stmt
         .query_map([], |row| row.get(0))?
@@ -58,7 +58,7 @@ pub fn create_environment(
     state: State<'_, DbState>,
     name: String,
 ) -> Result<Environment, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     let id = new_id();
     let timestamp = now();
     conn.execute(
@@ -82,7 +82,7 @@ pub fn update_environment(
     id: String,
     name: String,
 ) -> Result<Environment, DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     conn.execute(
         "UPDATE environments SET name = ?1, updated_at = ?2 WHERE id = ?3",
         params![name, now(), id],
@@ -92,14 +92,14 @@ pub fn update_environment(
 
 #[tauri::command]
 pub fn delete_environment(state: State<'_, DbState>, id: String) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     conn.execute("DELETE FROM environments WHERE id = ?1", params![id])?;
     Ok(())
 }
 
 #[tauri::command]
 pub fn set_active_environment(state: State<'_, DbState>, id: String) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     conn.execute("UPDATE environments SET is_active = 0", [])?;
     conn.execute(
         "UPDATE environments SET is_active = 1, updated_at = ?1 WHERE id = ?2",
@@ -113,7 +113,7 @@ pub fn set_active_environment(state: State<'_, DbState>, id: String) -> Result<(
 /// surfaces as the usual "undefined variable" block on Send).
 #[tauri::command]
 pub fn clear_active_environment(state: State<'_, DbState>) -> Result<(), DbError> {
-    let conn = state.conn.lock().unwrap();
+    let conn = state.connection();
     conn.execute("UPDATE environments SET is_active = 0", [])?;
     Ok(())
 }
@@ -124,7 +124,7 @@ pub fn set_environment_variables(
     environment_id: String,
     variables: Vec<EnvironmentVariable>,
 ) -> Result<Environment, DbError> {
-    let mut conn = state.conn.lock().unwrap();
+    let mut conn = state.connection();
     let tx = conn.transaction()?;
     tx.execute(
         "DELETE FROM environment_variables WHERE environment_id = ?1",

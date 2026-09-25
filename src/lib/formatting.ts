@@ -27,7 +27,7 @@ export function parseQueryString(url: string): {
 }
 
 /** Rebuilds a full URL from a base and query rows, dropping disabled/empty-key rows. */
-export function buildQueryString(base: string, params: KeyValueRow[]): string {
+export function buildQueryString(base: string, params: readonly KeyValueRow[]): string {
   const active = params.filter((row) => row.enabled && row.key.length > 0);
   if (active.length === 0) {
     return base;
@@ -38,7 +38,26 @@ export function buildQueryString(base: string, params: KeyValueRow[]): string {
   return `${base}?${query}`;
 }
 
-export function ensureTrailingEmptyRow(rows: KeyValueRow[]): KeyValueRow[] {
+/**
+ * Merges a newly-edited URL's query string back into the param rows.
+ * `buildQueryString` only shows *enabled* rows in the URL bar, so a naive
+ * `parseQueryString(value)` on every URL edit would silently drop any
+ * disabled row — it was never visible in the string to begin with. This
+ * re-parses only the enabled rows from the URL and keeps existing disabled
+ * rows untouched (still removable via the Params tab's own delete button).
+ */
+export function mergeQueryParamsFromUrl(
+  currentParams: readonly KeyValueRow[],
+  url: string,
+): { base: string; params: KeyValueRow[] } {
+  const { base, params: parsedEnabledParams } = parseQueryString(url);
+  const disabledParams = currentParams.filter((row) => !row.enabled);
+  return { base, params: [...parsedEnabledParams, ...disabledParams] };
+}
+
+export function ensureTrailingEmptyRow(
+  rows: readonly KeyValueRow[],
+): readonly KeyValueRow[] {
   const last = rows[rows.length - 1];
   if (!last || last.key.length > 0 || last.value.length > 0) {
     return [...rows, createEmptyRow()];

@@ -28,7 +28,7 @@ function statusColorClass(statusCode: number): string {
   return "text-status-server-error";
 }
 
-function parseSetCookieHeaders(headers: [string, string][]): string[] {
+function parseSetCookieHeaders(headers: readonly (readonly [string, string])[]): string[] {
   return headers.filter(([key]) => key.toLowerCase() === "set-cookie").map(([, value]) => value);
 }
 

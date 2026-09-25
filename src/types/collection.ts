@@ -1,7 +1,7 @@
 export interface Collection {
-  id: string;
-  name: string;
-  sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
+  readonly id: string;
+  readonly name: string;
+  readonly sortOrder: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 }
