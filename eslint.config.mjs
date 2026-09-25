@@ -72,7 +72,26 @@ export default defineConfig([
       "class-methods-use-this": "error",
     },
   },
-  ...ensureArray(json.configs.recommended),
+  ...ensureArray(json.configs.recommended).map((c) => ({
+    // Unlike markdown's recommended config below, @eslint/json's doesn't
+    // bake in `files`/`language` itself — the consumer is expected to add
+    // both. Without them, ESLint 10 errors immediately: it validates each
+    // rule against the language of every config it's combined with, and a
+    // JSON-only rule attached with no `language` looks like it's being
+    // asked to run against every other language present (markdown, css, ...).
+    files: ["**/*.json"],
+    // tsconfig*.json is JSONC (TypeScript's own tooling supports // and
+    // /* */ comments there) — excluded here, handled strictly-optional below.
+    ignores: ["**/tsconfig*.json"],
+    language: "json/json",
+    ...c,
+  })),
+  {
+    files: ["**/tsconfig*.json"],
+    language: "json/jsonc",
+    plugins: { json },
+    rules: json.configs.recommended.rules,
+  },
   ...ensureArray(markdown.configs.recommended).map((c) => ({
     ...c,
     rules: {
@@ -83,6 +102,14 @@ export default defineConfig([
     },
   })),
   ...ensureArray(css.configs.recommended).map((c) => ({
+    // Same missing files/language gap as json.configs.recommended above.
+    files: ["**/*.css"],
+    // @eslint/css's parser doesn't understand Tailwind v4's at-rules
+    // (@theme, @apply, @plugin, @source) — it's the only CSS file in this
+    // project and is fundamentally incompatible with this linter today,
+    // not a real violation. Revisit if @eslint/css adds Tailwind v4 support.
+    ignores: ["src/styles/globals.css"],
+    language: "css/css",
     ...c,
     rules: {
       ...c.rules,
