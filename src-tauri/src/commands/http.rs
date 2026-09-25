@@ -12,6 +12,12 @@ use crate::models::request::{HttpRequestPayload, HttpResponseResult};
 /// The actual request-execution logic, independent of Tauri's `State`
 /// wrapper so it can be unit-tested with a plain `reqwest::Client` and
 /// registry against a local mock server.
+///
+/// # Errors
+///
+/// Returns [`HttpError`] if the URL or method is invalid, the request
+/// fails to send (network/DNS/TLS/timeout), the response body can't be
+/// read, or the request is cancelled.
 pub async fn execute_request(
     client: &reqwest::Client,
     cancellations: &CancellationRegistry,
@@ -44,7 +50,7 @@ pub async fn execute_request(
     cancellations.unregister(&request_id);
 
     let response = match join_result {
-        Ok(send_result) => send_result.map_err(classify_reqwest_error)?,
+        Ok(send_result) => send_result.map_err(|e| classify_reqwest_error(&e))?,
         Err(join_err) if join_err.is_cancelled() => {
             return Err(HttpError::Cancelled {
                 message: "Request was cancelled.".to_string(),
@@ -69,7 +75,7 @@ pub async fn execute_request(
         })
         .collect();
 
-    let bytes = response.bytes().await.map_err(classify_reqwest_error)?;
+    let bytes = response.bytes().await.map_err(|e| classify_reqwest_error(&e))?;
     let body = String::from_utf8_lossy(&bytes).into_owned();
 
     Ok(HttpResponseResult {
@@ -78,11 +84,16 @@ pub async fn execute_request(
         headers,
         body_size_bytes: bytes.len(),
         body,
-        duration_ms: started.elapsed().as_millis() as u64,
+        duration_ms: u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX),
     })
 }
 
+/// # Errors
+///
+/// Returns [`HttpError`] if the request fails to resolve, connect, or
+/// complete — see [`execute_request`].
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub async fn send_request(
     state: State<'_, HttpState>,
     request_id: String,
@@ -91,7 +102,12 @@ pub async fn send_request(
     execute_request(&state.client, &state.cancellations, request_id, payload).await
 }
 
+/// # Errors
+///
+/// Never actually fails — an unknown `request_id` is simply a no-op — but
+/// returns `Result` to match Tauri's command-error-channel convention.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn cancel_request(state: State<'_, HttpState>, request_id: String) -> Result<(), HttpError> {
     state.cancellations.cancel(&request_id);
     Ok(())

@@ -15,7 +15,7 @@ impl CancellationRegistry {
     /// rationale as `DbState::connection`: one panicking request shouldn't
     /// permanently break cancellation for every request after it.
     fn handles(&self) -> MutexGuard<'_, HashMap<String, AbortHandle>> {
-        self.handles.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+        self.handles.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
     }
 
     pub fn register(&self, request_id: String, handle: AbortHandle) {

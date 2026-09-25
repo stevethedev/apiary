@@ -28,7 +28,11 @@ fn row_to_tab(row: &rusqlite::Row) -> rusqlite::Result<OpenTab> {
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying query fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn load_open_tabs(state: State<'_, DbState>) -> Result<Vec<OpenTab>, DbError> {
     let conn = state.connection();
     let mut stmt = conn.prepare("SELECT * FROM open_tabs ORDER BY sort_order")?;
@@ -41,7 +45,12 @@ pub fn load_open_tabs(state: State<'_, DbState>) -> Result<Vec<OpenTab>, DbError
 /// Replaces the entire `open_tabs` table contents in one transaction —
 /// simplest correct approach given the tab count is always small. Called
 /// (debounced on the frontend) on every tab-set/draft mutation.
+///
+/// # Errors
+///
+/// Returns [`DbError`] if the transaction fails to commit.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn save_open_tabs(state: State<'_, DbState>, tabs: Vec<OpenTab>) -> Result<(), DbError> {
     let mut conn = state.connection();
     let tx = conn.transaction()?;
@@ -52,6 +61,7 @@ pub fn save_open_tabs(state: State<'_, DbState>, tabs: Vec<OpenTab>) -> Result<(
         let headers_json = serde_json::to_string(&tab.draft_headers)?;
         let auth_json = serde_json::to_string(&tab.draft_auth)?;
         let body_json = serde_json::to_string(&tab.draft_body)?;
+        let sort_order = i64::try_from(index).unwrap_or(i64::MAX);
         tx.execute(
             "INSERT INTO open_tabs
              (id, request_id, name, is_active, sort_order, draft_method, draft_url,
@@ -63,7 +73,7 @@ pub fn save_open_tabs(state: State<'_, DbState>, tabs: Vec<OpenTab>) -> Result<(
                 tab.request_id,
                 tab.name,
                 tab.is_active,
-                index as i64,
+                sort_order,
                 tab.draft_method,
                 tab.draft_url,
                 params_json,

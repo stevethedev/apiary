@@ -20,7 +20,8 @@ pub enum HttpError {
 /// reqwest doesn't expose a distinct DNS-failure predicate, so a connect
 /// error whose source chain mentions DNS resolution is reported as `Dns`;
 /// everything else stays `Network`.
-pub fn classify_reqwest_error(err: reqwest::Error) -> HttpError {
+#[must_use]
+pub fn classify_reqwest_error(err: &reqwest::Error) -> HttpError {
     if err.is_timeout() {
         return HttpError::Timeout {
             message: "The request timed out.".to_string(),

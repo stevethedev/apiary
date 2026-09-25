@@ -43,7 +43,11 @@ fn load_environment(conn: &rusqlite::Connection, id: &str) -> Result<Environment
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying query fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn list_environments(state: State<'_, DbState>) -> Result<Vec<Environment>, DbError> {
     let conn = state.connection();
     let mut stmt = conn.prepare("SELECT id FROM environments ORDER BY created_at")?;
@@ -53,7 +57,11 @@ pub fn list_environments(state: State<'_, DbState>) -> Result<Vec<Environment>, 
     ids.iter().map(|id| load_environment(&conn, id)).collect()
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying insert fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn create_environment(
     state: State<'_, DbState>,
     name: String,
@@ -76,7 +84,11 @@ pub fn create_environment(
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying update or reload fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn update_environment(
     state: State<'_, DbState>,
     id: String,
@@ -90,14 +102,22 @@ pub fn update_environment(
     load_environment(&conn, &id)
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying delete fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn delete_environment(state: State<'_, DbState>, id: String) -> Result<(), DbError> {
     let conn = state.connection();
     conn.execute("DELETE FROM environments WHERE id = ?1", params![id])?;
     Ok(())
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying update fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn set_active_environment(state: State<'_, DbState>, id: String) -> Result<(), DbError> {
     let conn = state.connection();
     conn.execute("UPDATE environments SET is_active = 0", [])?;
@@ -111,14 +131,24 @@ pub fn set_active_environment(state: State<'_, DbState>, id: String) -> Result<(
 /// Deactivates every environment, leaving the request builder with no
 /// active environment (so `{{variables}}` resolve against nothing, which
 /// surfaces as the usual "undefined variable" block on Send).
+///
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying update fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn clear_active_environment(state: State<'_, DbState>) -> Result<(), DbError> {
     let conn = state.connection();
     conn.execute("UPDATE environments SET is_active = 0", [])?;
     Ok(())
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the transaction fails to commit or the reload
+/// afterward fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn set_environment_variables(
     state: State<'_, DbState>,
     environment_id: String,
@@ -131,6 +161,7 @@ pub fn set_environment_variables(
         params![environment_id],
     )?;
     for (index, variable) in variables.iter().enumerate() {
+        let sort_order = i64::try_from(index).unwrap_or(i64::MAX);
         tx.execute(
             "INSERT INTO environment_variables (id, environment_id, key, value, is_secret, sort_order)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
@@ -140,7 +171,7 @@ pub fn set_environment_variables(
                 variable.key,
                 variable.value,
                 variable.is_secret,
-                index as i64,
+                sort_order,
             ],
         )?;
     }

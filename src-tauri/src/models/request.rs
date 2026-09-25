@@ -58,7 +58,7 @@ pub struct SavedRequest {
 }
 
 /// Fields the frontend supplies when creating or updating a request; the
-/// server owns id/sort_order/timestamps.
+/// server owns `id`/`sort_order`/timestamps.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SavedRequestInput {

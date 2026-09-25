@@ -23,6 +23,11 @@ use commands::tabs::{load_open_tabs, save_open_tabs};
 use database::{connection, migrations, DbState};
 use http::HttpState;
 
+/// # Panics
+///
+/// Panics if the app data directory can't be created, the database can't
+/// be opened or migrated, or the Tauri runtime fails to start — any of
+/// which leaves the app unusable, so failing fast at startup is intentional.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()

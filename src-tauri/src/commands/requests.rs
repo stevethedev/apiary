@@ -28,7 +28,11 @@ fn row_to_request(row: &rusqlite::Row) -> rusqlite::Result<SavedRequest> {
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying query fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn list_requests(
     state: State<'_, DbState>,
     collection_id: String,
@@ -43,7 +47,11 @@ pub fn list_requests(
     Ok(rows)
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if no request with `id` exists, or the query fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn get_request(state: State<'_, DbState>, id: String) -> Result<SavedRequest, DbError> {
     let conn = state.connection();
     let request = conn.query_row(
@@ -54,7 +62,11 @@ pub fn get_request(state: State<'_, DbState>, id: String) -> Result<SavedRequest
     Ok(request)
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying insert fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn create_request(
     state: State<'_, DbState>,
     input: SavedRequestInput,
@@ -108,7 +120,11 @@ pub fn create_request(
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying update or reload fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn update_request(
     state: State<'_, DbState>,
     id: String,
@@ -150,7 +166,11 @@ pub fn update_request(
     Ok(request)
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if no request with `id` exists, or the insert fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn duplicate_request(
     state: State<'_, DbState>,
     id: String,
@@ -211,14 +231,22 @@ pub fn duplicate_request(
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying delete fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn delete_request(state: State<'_, DbState>, id: String) -> Result<(), DbError> {
     let conn = state.connection();
     conn.execute("DELETE FROM requests WHERE id = ?1", params![id])?;
     Ok(())
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the transaction fails to commit.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn reorder_requests(
     state: State<'_, DbState>,
     collection_id: String,
@@ -227,9 +255,10 @@ pub fn reorder_requests(
     let mut conn = state.connection();
     let tx = conn.transaction()?;
     for (index, id) in ordered_ids.iter().enumerate() {
+        let sort_order = i64::try_from(index).unwrap_or(i64::MAX);
         tx.execute(
             "UPDATE requests SET sort_order = ?1 WHERE id = ?2 AND collection_id = ?3",
-            params![index as i64, id, collection_id],
+            params![sort_order, id, collection_id],
         )?;
     }
     tx.commit()?;

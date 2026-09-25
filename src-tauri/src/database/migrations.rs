@@ -7,6 +7,11 @@ const MIGRATIONS: &[(&str, &str)] = &[
 
 /// Applies any migration not yet recorded in `schema_migrations`, each in
 /// its own transaction, in order. Safe to call on every startup.
+///
+/// # Errors
+///
+/// Returns an error if a migration's SQL fails to apply, or the
+/// bookkeeping insert/transaction commit fails.
 pub fn run(conn: &mut Connection) -> rusqlite::Result<()> {
     conn.execute_batch(
         "CREATE TABLE IF NOT EXISTS schema_migrations (

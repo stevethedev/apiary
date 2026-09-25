@@ -31,7 +31,11 @@ fn row_to_history_entry(row: &rusqlite::Row) -> rusqlite::Result<HistoryEntry> {
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying insert fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn append_history(
     state: State<'_, DbState>,
     entry: HistoryEntryInput,
@@ -89,7 +93,11 @@ pub fn append_history(
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying query fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn list_history(
     state: State<'_, DbState>,
     limit: i64,
@@ -105,7 +113,11 @@ pub fn list_history(
     Ok(rows)
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying delete fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn clear_history(state: State<'_, DbState>) -> Result<(), DbError> {
     let conn = state.connection();
     conn.execute("DELETE FROM history", [])?;

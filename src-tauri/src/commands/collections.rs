@@ -14,7 +14,11 @@ fn row_to_collection(row: &rusqlite::Row) -> rusqlite::Result<Collection> {
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying query fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn list_collections(state: State<'_, DbState>) -> Result<Vec<Collection>, DbError> {
     let conn = state.connection();
     let mut stmt = conn.prepare(
@@ -26,7 +30,11 @@ pub fn list_collections(state: State<'_, DbState>) -> Result<Vec<Collection>, Db
     Ok(rows)
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying insert fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn create_collection(state: State<'_, DbState>, name: String) -> Result<Collection, DbError> {
     let conn = state.connection();
     let id = new_id();
@@ -50,7 +58,11 @@ pub fn create_collection(state: State<'_, DbState>, name: String) -> Result<Coll
     })
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying update fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn rename_collection(
     state: State<'_, DbState>,
     id: String,
@@ -64,14 +76,22 @@ pub fn rename_collection(
     Ok(())
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the underlying delete fails.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn delete_collection(state: State<'_, DbState>, id: String) -> Result<(), DbError> {
     let conn = state.connection();
     conn.execute("DELETE FROM collections WHERE id = ?1", params![id])?;
     Ok(())
 }
 
+/// # Errors
+///
+/// Returns [`DbError`] if the transaction fails to commit.
 #[tauri::command]
+#[allow(clippy::needless_pass_by_value)] // Tauri's IPC layer always hands commands owned values.
 pub fn reorder_collections(
     state: State<'_, DbState>,
     ordered_ids: Vec<String>,
@@ -79,9 +99,10 @@ pub fn reorder_collections(
     let mut conn = state.connection();
     let tx = conn.transaction()?;
     for (index, id) in ordered_ids.iter().enumerate() {
+        let sort_order = i64::try_from(index).unwrap_or(i64::MAX);
         tx.execute(
             "UPDATE collections SET sort_order = ?1 WHERE id = ?2",
-            params![index as i64, id],
+            params![sort_order, id],
         )?;
     }
     tx.commit()?;

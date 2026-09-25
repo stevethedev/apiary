@@ -223,7 +223,7 @@ async fn cancelling_an_in_flight_request_reports_cancelled() {
 
     // Give the task a moment to register itself, then cancel it.
     tokio::select! {
-        _ = tokio::time::sleep(std::time::Duration::from_millis(50)) => {
+        () = tokio::time::sleep(std::time::Duration::from_millis(50)) => {
             let was_cancelled = registry.cancel(&request_id);
             assert!(was_cancelled, "expected an in-flight request to be registered");
         }

@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "A local-first API client"
 authors = ["Steven Jimenez"]
 edition = "2021"
+readme = "../README.md"
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -41,3 +43,16 @@ strip = true
 [dev-dependencies]
 tokio-test = "0.4.5"
 wiremock = "0.6.5"
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 }
+cargo = { level = "deny", priority = -1 }
+# This is a private, unpublished desktop app (see `publish = false` above) —
+# license/repository/keywords/categories are crates.io-publishing metadata
+# that genuinely doesn't apply yet. Filling them with placeholder values
+# just to satisfy the linter would be less honest than allowing it.
+cargo_common_metadata = "allow"
+# Duplicate transitive versions of things like windows-sys, syn, and base64
+# come from Tauri/reqwest/rusqlite's own dependency trees — not something a
+# leaf application crate controls without vendoring or patching upstream.
+multiple_crate_versions = "allow"
