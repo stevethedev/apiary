@@ -71,6 +71,10 @@ cargo clippy --all-targets   # pedantic + cargo lint groups, deny-level
 
 Both the TypeScript and Rust checks run in CI on every push and PR (`.github/workflows/`).
 
+## Releasing
+
+Versioning and releases are automated via [Changesets](https://github.com/changesets/changesets) — see `.changeset/README.md`. In short: `pnpm changeset` describes a change, merging to `main` gets it picked up into an auto-maintained "Version Packages" PR, and merging that PR tags the release and kicks off a cross-platform build (macOS/Linux/Windows) that attaches installers to a draft GitHub Release.
+
 ## Project structure
 
 ```text

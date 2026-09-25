@@ -4,6 +4,7 @@ import json from "@eslint/json";
 import markdown from "@eslint/markdown";
 import css from "@eslint/css";
 import prettier from "eslint-config-prettier/flat";
+import globals from "globals";
 import { defineConfig } from "eslint/config";
 import { cwd } from "node:process";
 
@@ -14,6 +15,12 @@ export default defineConfig([
   {
     ...js.configs.recommended,
     files: ["**/*.{mjs,cjs,js,jsx}"],
+    // These files (config files, Node scripts) run under Node, not the
+    // browser — without this, `no-undef` flags Node globals like
+    // `console`/`process` as undefined.
+    languageOptions: {
+      globals: globals.node,
+    },
   },
   ...ensureArray(tseslint.configs.strict).map((c) => ({
     ...c,

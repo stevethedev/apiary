@@ -1,0 +1,48 @@
+name: Changesets
+
+on:
+  push:
+    branches: [main]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  version-or-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # With pending changesets: opens/updates a "Version Packages" PR that
+      # runs `pnpm version` (bumps package.json + Cargo.toml + tauri.conf.json
+      # together, writes CHANGELOG.md).
+      #
+      # With no pending changesets (i.e. that PR was just merged): runs
+      # `publish`, which tags the release commit instead of publishing to
+      # npm — pushing the tag triggers release.yml's cross-platform build.
+      - name: Version or release
+        uses: changesets/action@v1
+        with:
+          version: pnpm version
+          publish: node scripts/tag-release.mjs
+          commit: "chore: version packages"
+          title: "chore: version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
