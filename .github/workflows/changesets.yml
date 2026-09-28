@@ -9,6 +9,9 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
+  # Lets tag-release.mjs dispatch release.yml directly via the Actions API
+  # (see release.yml's workflow_dispatch trigger for why that's needed).
+  actions: write
 
 jobs:
   version-or-release:

@@ -4,6 +4,17 @@ on:
   push:
     tags:
       - "v*"
+  # tag-release.mjs pushes the release tag using the job's GITHUB_TOKEN, and
+  # GitHub Actions doesn't let GITHUB_TOKEN-authored pushes trigger other
+  # workflows (loop prevention) — so the `push: tags:` trigger above never
+  # fires for it. It instead dispatches this workflow_dispatch event
+  # directly via the Actions API, passing the tag it just pushed.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.2.3)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -75,8 +86,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "Apiary ${{ github.ref_name }}"
+          tagName: ${{ inputs.tag || github.ref_name }}
+          releaseName: "Apiary ${{ inputs.tag || github.ref_name }}"
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
