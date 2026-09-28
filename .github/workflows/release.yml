@@ -48,6 +48,12 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          # workflow_dispatch runs against whatever ref the dispatch call
+          # targets (used so the workflow_dispatch trigger itself can be
+          # found), which isn't necessarily the tag being released —
+          # check out the tag explicitly instead.
+          ref: ${{ inputs.tag || github.ref_name }}
 
       - name: Install Tauri Linux system dependencies
         if: matrix.platform == 'ubuntu-22.04'
