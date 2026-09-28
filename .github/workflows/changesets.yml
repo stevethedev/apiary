@@ -40,7 +40,7 @@ jobs:
       - name: Version or release
         uses: changesets/action@v2
         with:
-          version-script: pnpm version
+          version-script: pnpm run version
           publish-script: node scripts/tag-release.mjs
           commit-message: "chore: version packages"
           pr-title: "chore: version packages"
