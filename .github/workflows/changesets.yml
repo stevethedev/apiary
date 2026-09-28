@@ -40,9 +40,9 @@ jobs:
       - name: Version or release
         uses: changesets/action@v2
         with:
-          version: pnpm version
-          publish: node scripts/tag-release.mjs
-          commit: "chore: version packages"
-          title: "chore: version packages"
+          version-script: pnpm version
+          publish-script: node scripts/tag-release.mjs
+          commit-message: "chore: version packages"
+          pr-title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
